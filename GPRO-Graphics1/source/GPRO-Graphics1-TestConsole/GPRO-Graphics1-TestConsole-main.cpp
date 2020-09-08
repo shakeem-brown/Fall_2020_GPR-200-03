@@ -53,9 +53,33 @@ void testVector()
 }
 
 
+#ifdef _cplusplus
+// includes for C++
+#include <fstream>
+#inculde <string>
+#else  // !_cplusplus
+// includes for C
+#endif // _cplusplus
+
+
 int main(int const argc, char const* const argv[])
 {
 	testVector();
+
+#ifdef _cplusplus
+	std::ofstream file("openme.txt");			// open file to write
+	std::string test = "Howdy";					// string to write
+	file << test << std::endl;					// write string (and newline)
+	file.close();								// is done, the file closes
+#else // !_cplusplus
+	FILE* fp = fopen("openme.txt", "w");		//open file to write
+	if (fp)										// checks if the file opens
+	{
+		char test[] = "Howdy";					// string to write
+		fprintf(fp, "%s\n", test);              // write string (and newline)
+		fclose(fp);							    // is done, the file closes
+	}
+#endif // _cplusplus
 
 	printf("\n\n");
 	system("pause");
