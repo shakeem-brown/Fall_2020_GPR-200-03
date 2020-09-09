@@ -56,7 +56,7 @@ typedef float const* floatkv;	// generic constant float vector (pointer)
 //	A 3D vector data structure.
 //		member v: array (pointer) version of data
 //		members x, y, z: named components of vector
-union vec3
+union vector3
 {
 	float3 v;
 	struct { float x, y, z; };
@@ -65,16 +65,16 @@ union vec3
 	// DB: in C++ we can have convenient member functions
 	//	-> e.g. constructors, operators
 
-	explicit vec3();	// default ctor
-	explicit vec3(float const xc, float const yc = 0.0f, float const zc = 0.0f);	// init ctor w one or more floats
-	explicit vec3(float3 const vc);	// copy ctor w generic array of floats
-	vec3(vec3 const& rh);	// copy ctor
+	explicit vector3();	// default ctor
+	explicit vector3(float const xc, float const yc = 0.0f, float const zc = 0.0f);	// init ctor w one or more floats
+	explicit vector3(float3 const vc);	// copy ctor w generic array of floats
+	vector3(vector3 const& rh);	// copy ctor
 
-	vec3& operator =(vec3 const& rh);	// assignment operator (copy other to this)
+	vector3& operator =(vector3 const& rh);	// assignment operator (copy other to this)
 
-	vec3& operator +=(vec3 const& rh);	// addition assignment operator (add other to this)
+	vector3& operator +=(vector3 const& rh);	// addition assignment operator (add other to this)
 
-	vec3 const operator +(vec3 const& rh) const;	// addition operator (get sum of this and another)
+	vector3 const operator +(vector3 const& rh) const;	// addition operator (get sum of this and another)
 
 #endif	// __cplusplus
 };

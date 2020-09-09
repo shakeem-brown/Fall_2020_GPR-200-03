@@ -159,6 +159,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\gpro\gpro-math\gproVector.h" />
+    <ClInclude Include="..\..\..\include\gpro\gpro-math\Ray.h" />
+    <ClInclude Include="..\..\..\include\gpro\gpro-math\Vector3.h" />
+    <ClInclude Include="..\..\..\include\gpro\gpro-output\Color.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\gpro\gpro-math\_inl\gproVector.inl" />

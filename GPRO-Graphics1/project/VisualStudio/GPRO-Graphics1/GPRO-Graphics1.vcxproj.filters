@@ -32,6 +32,15 @@
     <ClInclude Include="..\..\..\include\gpro\gpro-math\gproVector.h">
       <Filter>Header Files\gpro\gpro-math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\gpro\gpro-math\Vector3.h">
+      <Filter>Header Files\gpro\gpro-math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gpro\gpro-output\Color.h">
+      <Filter>Header Files\gpro\gpro-math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gpro\gpro-math\Ray.h">
+      <Filter>Header Files\gpro\gpro-math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\gpro\gpro-math\_inl\gproVector.inl">
