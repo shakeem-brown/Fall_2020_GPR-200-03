@@ -106,21 +106,22 @@ inline vector3 operator/(vector3 v, double t)
     return (1 / t) * v;
 }
 
-inline double dot(const vector3& u, const vector3& v) 
-{
+// Functions involving the defined vectors
+inline double dot(const vector3& u, const vector3& v) // Takes the given vectors, (x,y,z),
+{                                                     // and multplies them (dot product)
     return u.e[X_COORDINATE] * v.e[X_COORDINATE]
         + u.e[Y_COORDINATE] * v.e[Y_COORDINATE]
         + u.e[Z_COORDINATE] * v.e[Z_COORDINATE];
 }
 
-inline vector3 cross(const vector3& u, const vector3& v)
-{
+inline vector3 cross(const vector3& u, const vector3& v) // The cross multiplication of the vectors
+{                                                        // (Cross Product)
     return vector3(u.e[Y_COORDINATE] * v.e[Z_COORDINATE] - u.e[Z_COORDINATE] * v.e[Y_COORDINATE],
         u.e[Z_COORDINATE] * v.e[X_COORDINATE] - u.e[X_COORDINATE] * v.e[Z_COORDINATE],
         u.e[X_COORDINATE] * v.e[Y_COORDINATE] - u.e[Y_COORDINATE] * v.e[X_COORDINATE]);
 }
 
-inline vector3 unit_vector(vector3 v)
+inline vector3 unit_vector(vector3 v) // Defines the unit vector
 {
     return v / v.length();
 }

@@ -41,6 +41,18 @@
     <ClInclude Include="..\..\..\include\gpro\gpro-math\Ray.h">
       <Filter>Header Files\gpro\gpro-math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\gpro\gpro-math\Hittable.h">
+      <Filter>Header Files\gpro\gpro-math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gpro\gpro-objects\Hittables.h">
+      <Filter>Header Files\gpro\gpro-math\_inl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gpro\gpro-math\RTWeekend.h">
+      <Filter>Header Files\gpro\gpro-math\_inl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gpro\gpro-image\Sphere.h">
+      <Filter>Header Files\gpro\gpro-math\_inl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\gpro\gpro-math\_inl\gproVector.inl">

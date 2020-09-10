@@ -30,10 +30,14 @@
 #include <stdlib.h>
 
 
+#include "gpro/gpro-math/RTWeekend.h"
 #include "gpro/gpro-math/gproVector.h"
 #include "gpro/gpro-math/Vector3.h"
 #include "gpro/gpro-math/Ray.h"
 #include "gpro/gpro-output/Color.h"
+#include "gpro/gpro-math/Hittable.h"
+#include "gpro/gpro-image/Sphere.h"
+#include "gpro/gpro-objects/Hittables.h"
 
 using namespace std;
 
@@ -51,7 +55,7 @@ void testVector()
 
 #ifdef __cplusplus
 	// test all constructors and operators
-	vector3 a, b(1.0f, 2.0f, 3.0f), c(cv), d(c);		// default; init; copy array; copy
+	vector_3 a, b(1.0f, 2.0f, 3.0f), c(cv), d(c);		// default; init; copy array; copy
 	a = d;											// assign						-> a = (4, 5, 6)
 	d += b;											// add assign					-> d = (5, 7, 9)
 	d = b + b;										// sum, init, assign			-> d = (2, 4, 6)
@@ -68,26 +72,36 @@ void testVector()
 // includes for C
 #endif // _cplusplus
 
-bool hit_sphere(const point3& center, double radius, const ray& r)
+// returns a value depending on if the sphere is hit or not
+double hit_sphere(const point3& center, double radius, const ray& r)
 {
 	vector3 oc = r.origin() - center;
-	double a = dot(r.direction(), r.direction());
-	double b = 2.0 * dot(oc, r.direction());
-	double c = dot(oc, oc) - radius * radius;
-	double discriminant = b * b - 4 * a * c;
-	return (discriminant > 0);
+	double a = r.direction().squared_length();
+	double half_b = dot(oc, r.direction());
+	double c = oc.squared_length() - radius * radius;
+	double discriminant = half_b * half_b - a * c;
+	if (discriminant < 0)
+	{
+		return -1.0;
+	}
+	else
+	{
+		return (-half_b - sqrt(discriminant)) / a;
+	}
 }
 
 // The ray's color
-color ray_color(const ray& r) 
+color ray_color(const ray& r, const hittable& world)
 {
-	if (hit_sphere(point3(0, 0, -1), 0.5, r))
+	hit_record rec; // record object
+	if (world.hit(r, 0, infinity, rec)) 
 	{
-		return color(1, 0, 0);
+		return 0.5 * (rec.normal + color(1, 1, 1)); // returns this specific color
 	}
 	vector3 unit_direction = unit_vector(r.direction());
 	double t = 0.5 * (unit_direction.y() + 1.0);
-	return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
+	return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0); // returns this specific color
+
 }
 
 int main(int const argc, char const* const argv[])
@@ -97,17 +111,22 @@ int main(int const argc, char const* const argv[])
 
 	if (file) // checks if the file is open
 	{
-
 		// Image Dimensions
 		const double ASPECT_RATIO = 16.0 / 9.0;
 		const int IMAGE_WIDTH = 400;
 		const int IMAGE_HEIGHT = static_cast<int>(IMAGE_WIDTH / ASPECT_RATIO);
+
+		// World Dimensions
+		hittable_list world;
+		world.add(make_shared<sphere>(point3(0, 0, -1), 0.5));
+		world.add(make_shared<sphere>(point3(0, -100.5, -1), 100));
 
 		// Camera Properties
 		double viewport_height = 2.0;
 		double viewport_width = ASPECT_RATIO * viewport_height;
 		double focal_length = 1.0;
 
+		// Camera Dimensions
 		point3 origin = point3(0, 0, 0);
 		vector3 horizontal = vector3(viewport_width, 0, 0);
 		vector3 vertical = vector3(0, viewport_height, 0);
@@ -122,14 +141,14 @@ int main(int const argc, char const* const argv[])
 			// Actively checks while the program is running
 			cerr << "\rScanlines remaining: " << j << ' ' << flush;
 
-			// Uisng the "color", it generates each pixel and outputs its aspects to the console
+			// Uisng the "color", it generates each pixel and outputs its aspects to the ppm file
 			for (int i = 0; i < IMAGE_WIDTH; ++i)
 			{
-				double u = double(i) / (IMAGE_WIDTH - 1);
-				double v = double(j) / (IMAGE_HEIGHT - 1);
+				double u = double(i) / (static_cast<double>(IMAGE_WIDTH - 1));
+				double v = double(j) / (static_cast<double>(IMAGE_HEIGHT - 1));
 				ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-				color pixel_color = ray_color(r);
-				write_color(cout, pixel_color);
+				color pixel_color = ray_color(r, world);
+				write_color(file, pixel_color);
 			}
 		}
 
@@ -139,10 +158,10 @@ int main(int const argc, char const* const argv[])
 		// file closes
 		file.close();
 	}
-
-
 	return EXIT_SUCCESS;
 }
+
+
 
 /*
 #ifdef _cplusplus

@@ -18,8 +18,8 @@
 	gproVector.h
 	Interface for vectors. Sets an example for C and C++ compatible headers.
 
-	Modified by: ____________
-	Modified because: ____________
+	Modified by: ___Shakeem Brown_________
+	Modified because: ___vector3 naming_conflicted my vector.h________
 */
 
 #ifndef _GPRO_VECTOR_H_
@@ -56,7 +56,7 @@ typedef float const* floatkv;	// generic constant float vector (pointer)
 //	A 3D vector data structure.
 //		member v: array (pointer) version of data
 //		members x, y, z: named components of vector
-union vector3
+union vector_3
 {
 	float3 v;
 	struct { float x, y, z; };
@@ -65,16 +65,16 @@ union vector3
 	// DB: in C++ we can have convenient member functions
 	//	-> e.g. constructors, operators
 
-	explicit vector3();	// default ctor
-	explicit vector3(float const xc, float const yc = 0.0f, float const zc = 0.0f);	// init ctor w one or more floats
-	explicit vector3(float3 const vc);	// copy ctor w generic array of floats
-	vector3(vector3 const& rh);	// copy ctor
+	explicit vector_3();	// default ctor
+	explicit vector_3(float const xc, float const yc = 0.0f, float const zc = 0.0f);	// init ctor w one or more floats
+	explicit vector_3(float3 const vc);	// copy ctor w generic array of floats
+	vector_3(vector_3 const& rh);	// copy ctor
 
-	vector3& operator =(vector3 const& rh);	// assignment operator (copy other to this)
+	vector_3& operator =(vector_3 const& rh);	// assignment operator (copy other to this)
 
-	vector3& operator +=(vector3 const& rh);	// addition assignment operator (add other to this)
+	vector_3& operator +=(vector_3 const& rh);	// addition assignment operator (add other to this)
 
-	vector3 const operator +(vector3 const& rh) const;	// addition operator (get sum of this and another)
+	vector_3 const operator +(vector_3 const& rh) const;	// addition operator (get sum of this and another)
 
 #endif	// __cplusplus
 };

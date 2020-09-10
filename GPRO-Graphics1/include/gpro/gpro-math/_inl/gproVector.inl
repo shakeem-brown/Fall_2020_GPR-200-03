@@ -29,24 +29,24 @@
 
 #ifdef __cplusplus
 
-inline vector3::vector3()
+inline vector_3::vector_3()
 	: x(0.0f), y(0.0f), z(0.0f)
 {
 }
-inline vector3::vector3(float const xc, float const yc, float const zc)
+inline vector_3::vector_3(float const xc, float const yc, float const zc)
 	: x(xc), y(yc), z(zc)
 {
 }
-inline vector3::vector3(float3 const vc)
+inline vector_3::vector_3(float3 const vc)
 	: x(vc[0]), y(vc[1]), z(vc[2])
 {
 }
-inline vector3::vector3(vector3 const& rh)
+inline vector_3::vector_3(vector_3 const& rh)
 	: x(rh.x), y(rh.y), z(rh.z)
 {
 }
 
-inline vector3& vector3::operator =(vector3 const& rh)
+inline vector_3& vector_3::operator =(vector_3 const& rh)
 {
 	x = rh.x;
 	y = rh.y;
@@ -54,7 +54,7 @@ inline vector3& vector3::operator =(vector3 const& rh)
 	return *this;
 }
 
-inline vector3& vector3::operator +=(vector3 const& rh)
+inline vector_3& vector_3::operator +=(vector_3 const& rh)
 {
 	x += rh.x;
 	y += rh.y;
@@ -62,9 +62,9 @@ inline vector3& vector3::operator +=(vector3 const& rh)
 	return *this;
 }
 
-inline vector3 const vector3::operator +(vector3 const& rh) const
+inline vector_3 const vector_3::operator +(vector_3 const& rh) const
 {
-	return vector3((x + rh.x), (y + rh.y), (z + rh.z));
+	return vector_3((x + rh.x), (y + rh.y), (z + rh.z));
 }
 
 #endif	// __cplusplus

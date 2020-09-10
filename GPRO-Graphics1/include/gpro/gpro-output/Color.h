@@ -7,6 +7,7 @@
 
 #include <iostream>
 
+// Constants
 const double IMAGE_EDGE = 255.999;
 
 // Color utility Function
