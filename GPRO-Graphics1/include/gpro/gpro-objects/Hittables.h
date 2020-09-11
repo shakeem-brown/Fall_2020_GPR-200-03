@@ -44,7 +44,6 @@ bool hittable_list::hit(const ray& r, double t_min, double t_max, hit_record& re
             rec = temp_rec;              // the hit record object is updated
         }
     }
-
     return hit_anything; // returns if something has been hit or not
 }
 

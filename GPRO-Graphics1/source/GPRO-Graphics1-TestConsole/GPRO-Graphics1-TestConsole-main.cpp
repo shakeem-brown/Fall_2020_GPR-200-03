@@ -18,14 +18,16 @@
 	GPRO-Graphics1-TestConsole-main.c/.cpp
 	Main entry point source file for a Windows console application.
 
-	Modified by: ____________
-	Modified because: ____________
+	Modified by: ____Shakeem Brown & Andrew Barnett________
+	Modified because: ___Needed to Add functions in order to make the
+					  sphere._________
 */
 
 
-#include <cmath>
 #include <iostream>
+#include <cmath>
 #include <fstream>
+#include <string>
 #include <stdio.h>
 #include <stdlib.h>
 
