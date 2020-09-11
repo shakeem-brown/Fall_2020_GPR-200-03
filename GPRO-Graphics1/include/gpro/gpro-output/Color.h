@@ -1,5 +1,11 @@
 #pragma once
 
+/*
+    Modified by : ____Shakeem Brown & Andrew Barnett________
+    Modified because : ___Needed to Add the specific three colors provided in Peter Shirley's
+    "Ray Tracing in one Weekend" in order to color the object correctly_________
+*/
+
 #ifndef COLOR_H
 #define COLOR_H
 

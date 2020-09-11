@@ -19,8 +19,9 @@
 	Main entry point source file for a Windows console application.
 
 	Modified by: ____Shakeem Brown & Andrew Barnett________
-	Modified because: ___Needed to Add functions in order to make the
-					  sphere._________
+	Modified because: ___Needed to Add functions provided in Peter Shirley's
+	"Ray Tracing in one Weekend" in order to output the object onto the .ppm file_________
+	
 */
 
 
@@ -109,7 +110,7 @@ color ray_color(const ray& r, const hittable& world)
 int main(int const argc, char const* const argv[])
 {
 	testVector();
-	ofstream object_file("Lab1.ppm");
+	ofstream object_file("Lab1.ppm"); // Creating file
 
 	if (object_file) // checks if the file is open
 	{
@@ -162,22 +163,3 @@ int main(int const argc, char const* const argv[])
 	}
 	return EXIT_SUCCESS;
 }
-
-
-
-/*
-#ifdef _cplusplus
-	ofstream file("ppm.txt");			// open file to write
-	string test = "Howdy";					// string to write
-	file << test << endl;					// write string (and newline)
-	file.close();								// is done, the file closes
-#else // !_cplusplus
-	FILE* fp = fopen("openme.txt", "w");		//open file to write
-	if (fp)										// checks if the file opens
-	{
-		char test[] = "Howdy";					// string to write
-		fprintf(fp, "%s\n", test);              // write string (and newline)
-		fclose(fp);							    // is done, the file closes
-	}
-#endif // _cplusplus
-	*/

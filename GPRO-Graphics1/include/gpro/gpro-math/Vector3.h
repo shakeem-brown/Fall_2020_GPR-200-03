@@ -1,5 +1,11 @@
 #pragma once
 
+/*
+    Modified by : ____Shakeem Brown & Andrew Barnett________
+    Modified because : ___Needed to Add the vector3 class provided in Peter Shirley's
+    "Ray Tracing in one Weekend" in order to create vectors and relevent functions involving vectors_________
+*/
+
 #ifndef VECTOR3_H
 #define VECTOR3_H
 

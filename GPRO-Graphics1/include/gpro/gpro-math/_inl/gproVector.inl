@@ -18,8 +18,8 @@
 	gproVector.h
 	Interface for vectors. Sets an example for C and C++ compatible headers.
 
-	Modified by: ____________
-	Modified because: ____________
+	Modified by: ______Shakeem Brown & Andrew Barnett______
+	Modified because: _____There was a un planed naming__conflict with the variables we had_____
 */
 
 #ifdef _GPRO_VECTOR_H_

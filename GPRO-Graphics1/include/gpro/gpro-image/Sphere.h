@@ -1,5 +1,12 @@
 #pragma once
 
+/*
+    Modified by : ____Shakeem Brown & Andrew Barnett________
+    Modified because : ___Needed to Add the sphere class provided in Peter Shirley's
+    "Ray Tracing in one Weekend" in order to provide a specific shape/ object to draw
+    and to be hit._________
+*/
+
 #ifndef SPHERE_H
 #define SPHERE_H
 

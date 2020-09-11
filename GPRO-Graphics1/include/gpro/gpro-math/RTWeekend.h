@@ -1,5 +1,11 @@
 #pragma once
 
+/*
+    Modified by : ____Shakeem Brown & Andrew Barnett________
+    Modified because : ___Needed to Add the constants and utilities provided in Peter Shirley's
+    "Ray Tracing in one Weekend" in order to aid calculations for now and in the future._________
+*/
+
 #ifndef RTWEEKEND_H
 #define RTWEEKEND_H
 

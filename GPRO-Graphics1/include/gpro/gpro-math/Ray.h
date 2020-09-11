@@ -1,5 +1,11 @@
 #pragma once
 
+/*
+    Modified by : ____Shakeem Brown & Andrew Barnett________
+    Modified because : ___Needed to Add the ray class provided in Peter Shirley's
+    "Ray Tracing in one Weekend" in order to create a ray which may or may not hit the object_________
+*/
+
 #ifndef RAY_H
 #define RAY_H
 

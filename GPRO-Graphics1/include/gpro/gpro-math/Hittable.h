@@ -1,5 +1,12 @@
 #pragma once
 
+/*
+    Modified by : ____Shakeem Brown & Andrew Barnett________
+    Modified because : ___Needed to Add the hit_record struct provided in Peter Shirley's
+    "Ray Tracing in one Weekend" in order to determined when something has or has not been
+    hit in a given time and position_________
+*/
+
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
