@@ -109,9 +109,9 @@ color ray_color(const ray& r, const hittable& world)
 int main(int const argc, char const* const argv[])
 {
 	testVector();
-	ofstream file("Lab1.ppm");
+	ofstream object_file("Lab1.ppm");
 
-	if (file) // checks if the file is open
+	if (object_file) // checks if the file is open
 	{
 		// Image Dimensions
 		const double ASPECT_RATIO = 16.0 / 9.0;
@@ -150,7 +150,7 @@ int main(int const argc, char const* const argv[])
 				double v = double(j) / (static_cast<double>(IMAGE_HEIGHT - 1));
 				ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
 				color pixel_color = ray_color(r, world);
-				write_color(file, pixel_color);
+				write_color(object_file, pixel_color);
 			}
 		}
 
@@ -158,7 +158,7 @@ int main(int const argc, char const* const argv[])
 		cerr << "\nDone.\n";
 
 		// file closes
-		file.close();
+		object_file.close();
 	}
 	return EXIT_SUCCESS;
 }
