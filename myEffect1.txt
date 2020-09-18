@@ -9,6 +9,11 @@
 			 and a unique psychedelic effect.
 */
 
+// Effect #1: Checkerboard Pattern
+/*
+	Inspired by the creater @ 4rknova : Procedural Checkerboard
+							https://www.shadertoy.com/view/Xss3Dr
+*/
 vec4 myEffect1(in vec2 fragCoord, in vec2 resolution)
 {  
     float numberOfBoxes = 7.0; // number of boxs in a row
