@@ -1,0 +1,46 @@
+/*
+	@Auther: Shakeem Brown / @ sheakeem.brown@gmail.com
+
+	Tittle:  Lab2: Hello Shaders!
+
+	Purpose: A Lab2 assignment experimenting with shadertoy's tools
+			 to make cool effects with shaders such as: a gradian,
+			 checkerboard pattern, complemtary color changing circle,
+			 and a unique psychedelic effect.
+*/
+
+// Effect #3: Unique Psychedelic effect
+/*
+	Inspired by the creater @ FabriceNeyret2 : pattern 2 - psychedelic version
+							https://www.shadertoy.com/view/XdGSW3
+*/
+vec4 myEffect3(in vec2 fragCoord, in vec2 resolution, in float time)
+{
+    float scale = 20.0; // defines the scale
+    float alpha = 0.0; // defines the alpha
+    float pi = 3.14; // defines pi
+    float speed_of_ripple = 3.0;
+    
+    // creates the circler pattern of effect according to the resolution of the screen
+    vec2 pattern = cos(fragCoord * scale / resolution.y);
+    
+    // Sets the color of the image
+    vec4 color = vec4(7.0, 10.1, -2.1, alpha);
+    
+    // Creates the ripple effect to complete the psychedlic effect
+    vec4 ripple = 0.5 * sin(pi * (pattern.x + pattern.y + speed_of_ripple * time) + color);
+    
+    // Changes the shade and light spectrum of the ripple effect
+    ripple /= max(ripple.x, max(ripple.y, ripple.z));
+    
+    return vec4(ripple); // returns the psychedelic effect 
+    
+}
+ 
+// Calculates and pass the final display color of current pixel
+void mainImage( out vec4 fragColor, in vec2 fragCoord)
+{
+
+    fragColor = myEffect3(fragCoord, iResolution.xy, iTime); // final color to be displayed
+                                                             // It is assigned by the effect function
+}

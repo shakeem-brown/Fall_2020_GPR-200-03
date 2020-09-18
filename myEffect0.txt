@@ -1,0 +1,28 @@
+/*
+	@Auther: Shakeem Brown / @ sheakeem.brown@gmail.com
+
+	Tittle:  Lab2: Hello Shaders!
+
+	Purpose: A Lab2 assignment experimenting with shadertoy's tools
+			 to make cool effects with shaders such as: a gradian,
+			 checkerboard pattern, complemtary color changing circle,
+			 and a unique psychedelic effect.
+*/
+
+// Effect #0: Three Gradiant colors 
+vec4 myEffect0(in vec2 fragCoord, in vec2 resolution)
+{
+    vec2 uv = fragCoord / resolution.xy; // Sets the position according to the resoultion
+    vec3 color = vec3(uv, 0.0); // sets the color and gradian of the image
+
+    float alpha = 1.0; // defines the alpha
+    return vec4(color, alpha); // returns the gradiant image to main
+}
+
+// Calculates and pass the final display color of current pixel
+void mainImage( out vec4 fragColor, in vec2 fragCoord)
+{
+
+    fragColor = myEffect0(fragCoord, iResolution.xy); // final color to be displayed
+                                                      // It is assigned by the effect function
+}
