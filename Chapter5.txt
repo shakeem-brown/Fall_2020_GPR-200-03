@@ -56,7 +56,7 @@ void calcRay(out vec4 rayDirection, out vec4 rayOrigin,
 }
 
 // Calculates the squared length of two vectors
-float lengthSquared(in vec4 vector1, in vec4 vector2)
+float lengthSquared(in vec3 vector1, in vec3 vector2)
 {
     return dot(vector1, vector2); // calculates the dot product of the two vectors
 }
@@ -69,9 +69,14 @@ float pow2(in float number)
 }
 
 // might break
-float hit_sphere(in vec4 rayDirection, in vec4 rayOrigin, in float radius, in vec4 ray, resolution)
+bool hit_sphere(in vec4 rayDirection, in vec4 rayOrigin, in float radius, in vec4 ray, in vec3 center)
 {
-   vec4
+   vec3 oc = rayOrigin.xyz - center;
+    float a = lengthSquared(rayDirection.xyz, rayDirection.xyz);
+    float b = 2.0 * lengthSquared(oc, rayDirection.xyz);
+    float c = lengthSquared(oc, oc) - pow2(radius);
+    float discriminant = pow2(b) - (4.0 * a * c);
+    return (discriminant > 0.0);
 }
 
 // calcColor: calculate the color of a pixel given a ray
@@ -85,6 +90,12 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin, in float time )
     vec4 color2 = vec4(0.5, 0.7, 1.0, alpha);
     vec4 unit_vector = ray / rayDirection;
     vec4 unit_direction = unit_vector;
+    vec3 center = vec3(0.0, 0.0, -1.0);
+    vec4 sphere = vec4(1.0, 0.0, 0.0, 1.0);
+    if (hit_sphere(rayDirection, rayOrigin, 0.5, ray, center))
+    {
+		return sphere;
+    }
     float t = 0.5 * unit_direction.y + 1.0;
     vec4 finalColor = mix(color1, color2, alpha);
     return finalColor;
