@@ -68,15 +68,28 @@ float pow2(in float number)
     return number;
 }
 
+float squareRoot(in float number)
+{
+    return sqrt(number);
+}
+
 // might break
-bool hit_sphere(in vec4 rayDirection, in vec4 rayOrigin, in float radius, in vec4 ray, in vec3 center)
+float hit_sphere(in vec4 rayDirection, in vec4 rayOrigin, in float radius, in vec4 ray, in vec3 center)
 {
    vec3 oc = rayOrigin.xyz - center;
     float a = lengthSquared(rayDirection.xyz, rayDirection.xyz);
     float b = 2.0 * lengthSquared(oc, rayDirection.xyz);
     float c = lengthSquared(oc, oc) - pow2(radius);
     float discriminant = pow2(b) - (4.0 * a * c);
-    return (discriminant > 0.0);
+    if (discriminant > 0.0)
+    {
+     	float result = ((-b - squareRoot(discriminant)) * a * 0.5);
+        return result;
+    }
+    else
+    {
+        return -1.0; 
+    }
 }
 
 // calcColor: calculate the color of a pixel given a ray
@@ -92,11 +105,15 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin, in float time )
     vec4 unit_direction = unit_vector;
     vec3 center = vec3(0.0, 0.0, -1.0);
     vec4 sphere = vec4(1.0, 0.0, 0.0, 1.0);
-    if (hit_sphere(rayDirection, rayOrigin, 0.5, ray, center))
+    float t = hit_sphere(rayDirection, rayOrigin, 0.5, ray, center);
+    
+    if (t > 0.0)
     {
-		return sphere;
+		vec3 N = (ray.xyz - center) / unit_vector.xyz;
+        vec4 color = vec4(N.x + 1.0, N.y + 1.0, N.z + 1.0, 1.0);// change color of sphere
+        return 0.5 * color; 
     }
-    float t = 0.5 * unit_direction.y + 1.0;
+    t =  0.5 * ((unit_direction.y) + 1.0);
     vec4 finalColor = mix(color1, color2, alpha);
     return finalColor;
 }
@@ -129,20 +146,3 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     //fragColor = vec4(ndc, 0.0, 0.0);
     //fragColor = vec4(uv, 0.0, 0.0);
 }
-
-/* 
-vec4 oc = rayOrigin - rayOrigin.x;
-   float a = lengthSquared(rayDirection, rayDirection);
-   float b = 2.0 * lengthSquared(oc, rayDirection);
-   float c = lengthSquared(oc, oc) - pow2(radius);
-   float discriminant = pow2(radius) - 4.0 * a * c;
-    
-   if (discriminant > 0.0)
-   {
-       return (-b - sqrt(discriminant)) / (2.0 * a);
-   }
-   else
-   {
-       return -1.0;
-   }
-*/
