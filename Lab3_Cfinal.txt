@@ -75,24 +75,24 @@ float lengthSquared2(in vec2 vector1, in vec2 vector2)
 // 	    number: is ued to calculates the second power of a number
 float pow2(in float number)
 {
-    number *= number; // squared
-    return number;
+    number *= number; // itself squared
+    return number; // return the square
 }
 
 // squareRoot: finds the square root of a float
 //		normal: a float that is used to find the square root
 float squareRoot(in float number)
 {
-    return sqrt(number);
+    return sqrt(number); // return the square root of the number
 }
 
 // hit_record of when the object has been hit or not
 struct hit_rec
 {
- 	vec3 p; // initalizes the p vec
-    vec3 normal; // initalizes the the normal vector
-    float t; // initalizes the float of t
-    bool front_face; // initalizes the front face
+ 	vec3 p; // creates the p vec
+    vec3 normal; // creates the the normal vector
+    float t; // creates the float of t
+    bool front_face; // creates the front face
 };
 
 // set_face_normal: declares what is consider a front face and calls it normal
@@ -105,7 +105,7 @@ void set_face_normal(in vec4 rayDirection, in vec4 rayOrigin,
                      in vec3 center, in bool front_face, in vec3 normal)
 { 
     // defing the front face of the sphere based on the ray direction and center
-    front_face = lengthSquared(rayDirection.xyz, center) < 0.0; 
+    front_face = (lengthSquared(rayDirection.xyz, center) < 0.0); 
     normal = front_face ? center :-center; // defing the normal or front face of the sphere
 }
 
@@ -201,7 +201,7 @@ bool world_hit(in vec4 rayDirection, in vec4 rayOrigin,
 	https://stackoverflow.com/questions/5149544/can-i-generate-a-random-number-inside-a-pixel-shader 
 */
 const float RAND_MAX = 23.14069263277926; // e^pi (Gelfond's constant)
-const float RAND_MIN = 2.665144142690225; //2^sqr(2) (Gelfond's "Schneider constant"
+const float RAND_MIN = 2.665144142690225; //2^sqr(2) (Gelfond's "Schneider constant")
 // rand: calculates a random numbers using the dot product, cos, and fract
 //		fragCoord:	input location of current pixel in image (in pixels)
 float rand(in vec2 fragCoord)
@@ -269,7 +269,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec2 viewport, ndc, uv, resolutionInv;
     float aspect;
     const float viewportHeight = 2.0, focalLength = 1.0;
-    const float radius = 0.5;
+    const float radius = 0.5; // defines the radius
 	
     hit_rec record;
     
