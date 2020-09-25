@@ -76,14 +76,14 @@ float squareRoot(in float number)
 // might break
 float hit_sphere(in vec4 rayDirection, in vec4 rayOrigin, in float radius, in vec4 ray, in vec3 center)
 {
-   vec3 oc = rayOrigin.xyz - center;
+    vec3 oc = rayOrigin.xyz - center;
     float a = lengthSquared(rayDirection.xyz, rayDirection.xyz);
-    float b = 2.0 * lengthSquared(oc, rayDirection.xyz);
+    float half_b = lengthSquared(oc, rayDirection.xyz);
     float c = lengthSquared(oc, oc) - pow2(radius);
-    float discriminant = pow2(b) - (4.0 * a * c);
+    float discriminant = pow2(half_b) - (a * c);
     if (discriminant > 0.0)
     {
-     	float result = ((-b - squareRoot(discriminant)) * a * 0.5);
+     	float result = ((-half_b - squareRoot(discriminant)) / a);
         return result;
     }
     else
@@ -117,6 +117,69 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin, in float time )
     vec4 finalColor = mix(color1, color2, alpha);
     return finalColor;
 }
+
+struct hit_rec
+{
+ 	vec3 p;
+    vec3 normal;
+    float t;
+    bool front_face;
+};
+
+void set_face_normal(in vec4 rayDirection, in vec4 rayOrigin,
+                     in vec3 center, in bool front_face, in vec3 normal)
+{
+    front_face = lengthSquared(rayDirection.xyz, center) < 0.0;
+    normal = front_face ? center :-center;
+}
+    
+struct sphere
+{
+	vec3 center;
+    float ray;
+};
+
+
+bool hit(in vec4 rayDirection, in vec4 rayOrigin,
+         in float t_max, in float t_min, in hit_rec record, in float radius)
+{
+    vec4 ray = rayEval(rayDirection, rayOrigin, record.t); // defining the ray
+    vec3 center = vec3(0.0, 0.0, -1.0);
+    vec3 oc = rayOrigin.xyz - center;
+    float a = lengthSquared(rayDirection.xyz, rayDirection.xyz);
+    float half_b = lengthSquared(oc, rayDirection.xyz);
+    float c = lengthSquared(oc, oc) - pow2(radius);
+    float discriminant = pow2(half_b) - (a * c);
+
+    if (discriminant > 0.0)
+    {
+        float root = squareRoot(discriminant);
+        float temp = (-half_b - root) / a;
+        if (temp < t_max && temp > t_min)
+        {
+            record.t = temp;
+            record.p = ray.xyz;
+            vec3 outward_normal = (record.p - center) / radius;
+            set_face_normal(rayDirection, rayOrigin, outward_normal, record.front_face, record.normal);
+            return true;
+        }
+
+        temp = (-half_b + root) / a;
+        if (temp < t_max && temp > t_min) 
+        {
+            record.t = temp;
+            record.p = ray.xyz;
+            vec3 outward_normal = (record.p - center) / radius;
+            set_face_normal(rayDirection, rayOrigin, outward_normal, record.front_face, record.normal);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
 
 // mainImage: process the current pixel (exactly one call per pixel)
 //    fragColor: output final color for current pixel
