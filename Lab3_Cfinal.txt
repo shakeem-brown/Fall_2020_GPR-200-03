@@ -55,11 +55,18 @@ void calcRay(out vec4 rayDirection, out vec4 rayOrigin,
     rayDirection = vec4(viewport.x, viewport.y, -focalLength, 0.0);
 }
 
-// Calculates the squared length of two vectors
+// Calculates the squared length of two vectors threes
 float lengthSquared(in vec3 vector1, in vec3 vector2)
 {
     return dot(vector1, vector2); // calculates the dot product of the two vectors
 }
+
+// Calculates the squared length of two vectors twos
+float lengthSquared2(in vec2 vector1, in vec2 vector2)
+{
+    return dot(vector1, vector2); // calculates the dot product of the two vectors
+}
+
 
 // Calculates the second power of a 
 float pow2(in float number)
@@ -166,17 +173,36 @@ bool world_hit(in vec4 rayDirection, in vec4 rayOrigin,
     return hit_anything;
 }
 
+const float RAND_MAX = 23.14069263277926; // e^pi (Gelfond's constant)
+const float RAND_MIN = 2.665144142690225; //2^sqr(2) (Gelfond's "Schneider constant"
 
+float rand(in vec2 fragCoord)
+{
+    vec2 numbers = vec2(RAND_MAX, RAND_MIN);
+    return fract(cos(lengthSquared2(fragCoord, numbers)) * 12345.6789);
+}
 
+float randomNums(in vec2 fragCoord)
+{
+    // Returns a random real in [0,1).
+    float float_randnum = rand(fragCoord) / (RAND_MAX + 1.0);
+    return float_randnum;
+}
 
+float random_float(in vec2 fragCoord, float _min, float _max) 
+{
+    // Returns a random real in [min,max).
+    return _min + (_max - _min) * randomNums(fragCoord);
+}
 
         
 // calcColor: calculate the color of a pixel given a ray
 //    rayDirection: input ray direction
 //    rayOrigin:    input ray origin
 vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin,
-               in float time, in hit_rec record, in float radius )
+               in float time, in hit_rec record, in float radius, in vec2 fragCoord )
 {
+    const float INFINITY = 999999999999999.999;
  	vec4 ray = rayEval(rayDirection, rayOrigin, time); // defining the ray
     float alpha = rayDirection.y + 1.0;
     vec4 color1 = vec4(1.0, 1.0, 1.0, alpha);
@@ -185,14 +211,14 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin,
     vec4 unit_direction = unit_vector;
     vec3 center = vec3(0.0, 0.0, -1.0);
     vec4 sphere = vec4(1.0, 0.0, 0.0, 1.0);
-    bool check_world = world_hit(rayDirection, rayOrigin, 999.0, 0.0, record, radius);
-    if (check_world)
+    bool check_world = world_hit(rayDirection, rayOrigin, INFINITY, 0.0, record, radius);
+    if (check_world) // in the circle
     {
         record.normal = (ray.xyz - center) / unit_vector.xyz;
         vec4 result = vec4((0.5 * record.normal + color1.xyz), 1.0);
         return result;
     }
-    
+   // the background image/ color
     float t = 0.5 * ((unit_direction.y) + 1.0);
     vec4 finalColor = mix(color1, color2, alpha);
     return finalColor;
@@ -222,7 +248,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
             viewport, focalLength);
 
     // color
-    fragColor = calcColor(rayDirection, rayOrigin, iTime, record, radius );
+    fragColor = calcColor(rayDirection, rayOrigin, iTime, record, radius, fragCoord );
 
     // TEST COLOR:
     //  -> what do the other things calculated above look like?
@@ -231,14 +257,3 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     //fragColor = vec4(uv, 0.0, 0.0);
 }
 
-/*
-float t = hit_sphere(rayDirection, rayOrigin, 0.5, ray, center);
-    
-    if (t > 0.0)
-    {
-		vec3 N = (ray.xyz - center) / unit_vector.xyz;
-        vec4 color = vec4(N.x + 1.0, N.y + 1.0, N.z + 1.0, 1.0);// change color of sphere
-        return 0.5 * color; 
-    }
-t =  0.5 * ((unit_direction.y) + 1.0);
-*/
