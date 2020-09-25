@@ -55,140 +55,173 @@ void calcRay(out vec4 rayDirection, out vec4 rayOrigin,
     rayDirection = vec4(viewport.x, viewport.y, -focalLength, 0.0);
 }
 
-// Calculates the squared length of two vectors threes
+// lengthSquared: Calculates the squared length of two vectors threes
+//		vector1: the first vector being dot product
+//		vector2: the second vector being dot product
 float lengthSquared(in vec3 vector1, in vec3 vector2)
 {
     return dot(vector1, vector2); // calculates the dot product of the two vectors
 }
 
-// Calculates the squared length of two vectors twos
+// lengthSquared2: Calculates the squared length of two vectors twos
+//		vector1: the first vector being dot product
+//		vector2: the second vector being dot product
 float lengthSquared2(in vec2 vector1, in vec2 vector2)
 {
     return dot(vector1, vector2); // calculates the dot product of the two vectors
 }
 
-
-// Calculates the second power of a 
+// pow2: finds the second power if a number
+// 	    number: is ued to calculates the second power of a number
 float pow2(in float number)
 {
     number *= number; // squared
     return number;
 }
 
+// squareRoot: finds the square root of a float
+//		normal: a float that is used to find the square root
 float squareRoot(in float number)
 {
     return sqrt(number);
 }
 
-// might break
-float hit_sphere(in vec4 rayDirection, in vec4 rayOrigin, in float radius, in vec4 ray, in vec3 center)
-{
-    vec3 oc = rayOrigin.xyz - center;
-    float a = lengthSquared(rayDirection.xyz, rayDirection.xyz);
-    float half_b = lengthSquared(oc, rayDirection.xyz);
-    float c = lengthSquared(oc, oc) - pow2(radius);
-    float discriminant = pow2(half_b) - (a * c);
-    if (discriminant > 0.0)
-    {
-     	float result = ((-half_b - squareRoot(discriminant)) / a);
-        return result;
-    }
-    else
-    {
-        return -1.0; 
-    }
-}
-
+// hit_record of when the object has been hit or not
 struct hit_rec
 {
- 	vec3 p;
-    vec3 normal;
-    float t;
-    bool front_face;
+ 	vec3 p; // initalizes the p vec
+    vec3 normal; // initalizes the the normal vector
+    float t; // initalizes the float of t
+    bool front_face; // initalizes the front face
 };
 
-    void set_face_normal(in vec4 rayDirection, in vec4 rayOrigin,
+// set_face_normal: declares what is consider a front face and calls it normal
+//    rayDirection: input ray direction
+//    rayOrigin:    input ray origin
+// 	  center: the center of the sphere object
+//    front_face: the logic that allows if the object is facing forward or not
+// 	  normal: the vector that is positioned to make the sphere face forward or not
+void set_face_normal(in vec4 rayDirection, in vec4 rayOrigin,
                      in vec3 center, in bool front_face, in vec3 normal)
-{
-    front_face = lengthSquared(rayDirection.xyz, center) < 0.0;
-    normal = front_face ? center :-center;
+{ 
+    // defing the front face of the sphere based on the ray direction and center
+    front_face = lengthSquared(rayDirection.xyz, center) < 0.0; 
+    normal = front_face ? center :-center; // defing the normal or front face of the sphere
 }
-    
+
+// Sphere object structure
 struct sphere
 {
-	vec3 center;
-    float ray;
+	vec3 center; // sphere center
+    float ray; // ray_length float
 };
-    
+
+// hit: Checks if the object hits another object via rays
+//    rayDirection: input ray direction
+//    rayOrigin:    input ray origin
+//		t_min:	minimum float
+//		t_max:	maximum float
+//    record: an instance of the hit record structure
+//    radius: the radius of the object
 bool hit(in vec4 rayDirection, in vec4 rayOrigin,
          in float t_max, in float t_min, in hit_rec record, in float radius)
 {
     vec4 ray = rayEval(rayDirection, rayOrigin, record.t); // defining the ray
-    vec3 center = vec3(0.0, 0.0, -1.0);
-    vec3 oc = rayOrigin.xyz - center;
-    float a = lengthSquared(rayDirection.xyz, rayDirection.xyz);
+    vec3 center = vec3(0.0, 0.0, -1.0); // defing the center of the object
+    vec3 oc = rayOrigin.xyz - center; // the rays origin subtracted by the center of the object
+    float a = lengthSquared(rayDirection.xyz, rayDirection.xyz); // the dot product of the raydirection
+    
+    // half the dot product of the "oc" and the rayDirection
     float half_b = lengthSquared(oc, rayDirection.xyz);
-    float c = lengthSquared(oc, oc) - pow2(radius);
-    float discriminant = pow2(half_b) - (a * c);
-
-    if (discriminant > 0.0)
+    
+    // the dot product of "oc" subtracted by the raduis squared
+    float c = lengthSquared(oc, oc) - pow2(radius); 
+    
+    // defines the discrimant by squareing the "half_b" and subtracting the product of "a and c"
+    float discriminant = pow2(half_b) - (a * c); 
+	
+    // Positive case
+    if (discriminant > 0.0) // checks if the driscrimnant is not zero
     {
-        float root = squareRoot(discriminant);
-        float temp = (-half_b - root) / a;
-        if (temp < t_max && temp > t_min)
+        float root = squareRoot(discriminant); // defins the squared root of the discriminant
+        float temp = (-half_b - root) / a; // defines a temp float
+        if ((temp < t_max) && (temp > t_min)) // checks temp is: t_min < temp < t_max
         {
-            record.t = temp;
-            record.p = ray.xyz;
-            vec3 outward_normal = (record.p - center) / radius;
+            record.t = temp; // sets the record.t to temp
+            record.p = ray.xyz; // sets the record.p to the ray itself
+            vec3 outward_normal = (record.p - center) / radius; // defines what outward_normal is
+            // calls the set face normal function
             set_face_normal(rayDirection, rayOrigin, outward_normal, record.front_face, record.normal);
-            return true;
+            return true; // returns 1 == true the object is hit
         }
-
-        temp = (-half_b + root) / a;
-        if (temp < t_max && temp > t_min) 
+		
+        // Negative case
+        temp = (-half_b + root) / a; // redefines the temp from the negative case to make it positve
+        if (temp < t_max && temp > t_min) // checks temp is: t_min < temp < t_max
         {
-            record.t = temp;
-            record.p = ray.xyz;
-            vec3 outward_normal = (record.p - center) / radius;
+            record.t = temp;// sets the record.t to temp
+            record.p = ray.xyz; // sets the record.p to the ray itself
+            vec3 outward_normal = (record.p - center) / radius; // defines what outward_normal is
+            // calls the set face normal function
             set_face_normal(rayDirection, rayOrigin, outward_normal, record.front_face, record.normal);
-            return true;
+            return true; // returns 1 == true the object is hit
         }
     }
 
-    return false;
+    return false; // returns 0 == false;
 }
-    
+
+// World_hit: Checks if the world hits and object
+//    rayDirection: input ray direction
+//    rayOrigin:    input ray origin
+//		t_min:	minimum float
+//		t_max:	maximum float
+//    record: an instance of the hit record structure
+//    radius: the radius of the object
 bool world_hit(in vec4 rayDirection, in vec4 rayOrigin,
                    in float t_max, in float t_min, in hit_rec record, in float radius)
 {
-    bool hit_anything = false;
-    float closest_so_far = t_max;
-
+    bool hit_anything = false; // intializing bool to not hit
+    float closest_so_far = t_max; // setting the float to the max number
+	
+    // If the world hits the object "Sphere"
     if (hit(rayDirection, rayOrigin, t_max, t_min, record, radius))
     {
-        hit_anything = true;
-        closest_so_far = record.t;
+        hit_anything = true; // set the bool to true
+        closest_so_far = record.t; // sets the closest to the record
     }
 
-    return hit_anything;
+    return hit_anything; // returns either (1 if hit) or (0 if not hit)
 }
 
+
+
+/*
+	Inspired by user: @ chaosTechnician
+	https://stackoverflow.com/questions/5149544/can-i-generate-a-random-number-inside-a-pixel-shader 
+*/
 const float RAND_MAX = 23.14069263277926; // e^pi (Gelfond's constant)
 const float RAND_MIN = 2.665144142690225; //2^sqr(2) (Gelfond's "Schneider constant"
-
+// rand: calculates a random numbers using the dot product, cos, and fract
+//		fragCoord:	input location of current pixel in image (in pixels)
 float rand(in vec2 fragCoord)
 {
-    vec2 numbers = vec2(RAND_MAX, RAND_MIN);
-    return fract(cos(lengthSquared2(fragCoord, numbers)) * 12345.6789);
+    vec2 numbers = vec2(RAND_MAX, RAND_MIN); // using a vector to set the min and max
+    return fract(cos(lengthSquared2(fragCoord, numbers)) * 12345.6789); // returns a random float
 }
 
+// randomNums: calculates a random number based on the fragCoord
+//		fragCoord:	input location of current pixel in image (in pixels)
 float randomNums(in vec2 fragCoord)
 {
-    // Returns a random real in [0,1).
-    float float_randnum = rand(fragCoord) / (RAND_MAX + 1.0);
-    return float_randnum;
+    float float_randnum = rand(fragCoord) / (RAND_MAX + 1.0); // setting a random real
+    return float_randnum; // Returns a random real in [0,1).
 }
 
+// random_float: calculates a random float given the min and max
+//		fragCoord:	input location of current pixel in image (in pixels)
+//		_min:	minimum float
+//		_max:	maximum float
 float random_float(in vec2 fragCoord, float _min, float _max) 
 {
     // Returns a random real in [min,max).
@@ -202,26 +235,28 @@ float random_float(in vec2 fragCoord, float _min, float _max)
 vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin,
                in float time, in hit_rec record, in float radius, in vec2 fragCoord )
 {
-    const float INFINITY = 999999999999999.999;
+    const float INFINITY = 999999999999999.999; // making a arbitrary value for infinity
  	vec4 ray = rayEval(rayDirection, rayOrigin, time); // defining the ray
-    float alpha = rayDirection.y + 1.0;
-    vec4 color1 = vec4(1.0, 1.0, 1.0, alpha);
-    vec4 color2 = vec4(0.5, 0.7, 1.0, alpha);
-    vec4 unit_vector = ray / rayDirection;
-    vec4 unit_direction = unit_vector;
-    vec3 center = vec3(0.0, 0.0, -1.0);
-    vec4 sphere = vec4(1.0, 0.0, 0.0, 1.0);
+    float alpha = rayDirection.y + 1.0; // defining the alpha value since it was orignally a vec3
+    vec4 color1 = vec4(1.0, 1.0, 1.0, alpha); // defining the first color
+    vec4 color2 = vec4(0.5, 0.7, 1.0, alpha); // defining the second color
+    vec4 unit_vector = ray / rayDirection; // defining the unit vector of the ray
+    vec4 unit_direction = unit_vector; // setting the unit direction to the same value as the direction
+    vec3 center = vec3(0.0, 0.0, -1.0); // defining the center of the circle
+    vec4 sphere = vec4(1.0, 0.0, 0.0, 1.0); // setting the orignal sphere vector
+    
+    // setting the check if world is hit bool
     bool check_world = world_hit(rayDirection, rayOrigin, INFINITY, 0.0, record, radius);
-    if (check_world) // in the circle
+    // in the circle
+    if (check_world) // if the world is hit
     {
-        record.normal = (ray.xyz - center) / unit_vector.xyz;
-        vec4 result = vec4((0.5 * record.normal + color1.xyz), 1.0);
-        return result;
+        record.normal = (ray.xyz - center) / unit_vector.xyz; // setting the normal
+        vec4 result = vec4((0.5 * record.normal + color2.xyz), 1.0); // setting resulting sphere vector
+        return result; // returns the sphere
     }
-   // the background image/ color
-    float t = 0.5 * ((unit_direction.y) + 1.0);
-    vec4 finalColor = mix(color1, color2, alpha);
-    return finalColor;
+    // the background image/ color
+    vec4 backgroundColor = mix(color1, color2, alpha); // mixing color1 with color2
+    return backgroundColor; // returns the background color
 }
                     
 
@@ -250,10 +285,5 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     // color
     fragColor = calcColor(rayDirection, rayOrigin, iTime, record, radius, fragCoord );
 
-    // TEST COLOR:
-    //  -> what do the other things calculated above look like?
-    //fragColor = vec4(viewport, 0.0, 0.0);
-    //fragColor = vec4(ndc, 0.0, 0.0);
-    //fragColor = vec4(uv, 0.0, 0.0);
 }
 
