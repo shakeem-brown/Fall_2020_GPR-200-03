@@ -141,8 +141,7 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
     {
         dp.z = rSq - lSq;
         
-        vec3 position = sphere.center.xyz + vec3(dp.x, dp.y, sqrt(dp.z)); // zSq -> z
-      
+        vec3 position = sphere.center.xyz + vec3(dp.x, dp.y, sqrt(dp.z)); // zSq -> 
         vec3 normal = vec3 (position - sphere.center.xyz) / sphere.radius; // normalizing it
         
         vec3 lightPos = normalize(light.center.xyz - position);
@@ -151,7 +150,6 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
         vec3 lightDis = vec3(light.center.xyz - sphere.radius); 
         vec3 attenuation = 1.0 / (1.0 + (lightDis / light.intensity) +  pow2vec3(lightDis) / pow2f(light.intensity));
         vec3 difIntensity = vec3(difCoefficient * attenuation);
-        
         vec3 lam_color = vec3(difIntensity * normal * light.color);
         
         vec3 viewVec = normalize(rayOrigin.xyz - position);
@@ -166,8 +164,14 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
         vec3 blue = vec3(0.0, 0.0, 1.0);
         vec3 phong_color = vec3((ambIntensity * blue) + ((difIntensity * purple) + (specIntensity * purple)) * light.color);
         
+        vec3 half_vector = normalize(lightPos + veiwVec);
+        float blinnCoefficient = dot(normal, half_vector);
+        float blinnHighExpo = (4.0 * highExpo);
+        float blinnSpecIntesnity = powerf(blinnCoefficient, blinnHighExpo);
+        vec3 blinn_pong_color =  vec3((ambIntensity * blue) + ((difIntensity * purple) + (blinnSpecIntesnity * purple)) * light.color);
         
- 
+        
+        
         
         return vec4(normal * 0.5 + 0.5, 1.0);
         
