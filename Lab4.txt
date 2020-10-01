@@ -74,19 +74,42 @@ void initSphere(out sSphere sphere, in vec3 center, in float radius)
 
 } 
 
+// utlility functions
 float lenSQ (vec2 x)
 {
  	return dot(x, x);   
 }
 
+float pow2f(float x)
+{
+ 	return (x * x);   
+}
+
+vec3 pow2vec3(vec3 x)
+{
+ 	return (x * x);   
+}
+
+vec3 powerVec(vec3 number, vec3 exponent)
+{
+ 	return pow(number, exponent);
+}
+
+float powerf(float number, float exponent)
+{
+ 	return pow(number, exponent);
+}
+
+//
+
 struct pointLight
 {
     vec4 center;
-    vec3 color; // could be vec4
+    vec3 color; 
     float intensity;  
 };
 
-void initLight(out pointlight light, in vec4 center, in float intensity, in vec3 color)
+void initLight(out pointLight light, in vec3 center, in float intensity, in vec3 color)
 {
     light.center = asOffset(center);
     light.color = color;
@@ -100,14 +123,13 @@ void initLight(out pointlight light, in vec4 center, in float intensity, in vec3
 vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
 {
     //SCENE
-    pointLight light;
-    
-    lightPos = normalize(
-    
-    initLight(light, vec3(0.0, 0.0, -4.0), 0.5);
-    
     sSphere sphere;
     initSphere(sphere, vec3(0.0, 0.0, -4.0), 0.5);
+    
+    pointLight light;
+    light.intensity = 1.0;
+    initLight(light, vec3(0.0, 0.0, 0.0), light.intensity, vec3(0.0, 0.0, 0.0));
+    
     
     //TEST
     vec3 dp;
@@ -115,13 +137,37 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
     float lSq = lenSQ(dp.xy);
     float rSq = sphere.radius * sphere.radius;
         
-    if (lenSq <= rSq)
+    if (lSq <= rSq)
     {
         dp.z = rSq - lSq;
         
         vec3 position = sphere.center.xyz + vec3(dp.x, dp.y, sqrt(dp.z)); // zSq -> z
       
         vec3 normal = vec3 (position - sphere.center.xyz) / sphere.radius; // normalizing it
+        
+        vec3 lightPos = normalize(light.center.xyz - position);
+        float difCoefficient = max(0.0, dot(normal, lightPos));
+        
+        vec3 lightDis = vec3(light.center.xyz - sphere.radius); 
+        vec3 attenuation = 1.0 / (1.0 + (lightDis / light.intensity) +  pow2vec3(lightDis) / pow2f(light.intensity));
+        vec3 difIntensity = vec3(difCoefficient * attenuation);
+        
+        vec3 lam_color = vec3(difIntensity * normal * light.color);
+        
+        vec3 viewVec = normalize(rayOrigin.xyz - position);
+        vec3 refLightVec = reflect(-(lightPos), normal);
+        
+        float specCoefficient = max(0.0, dot(viewVec, refLightVec));
+        const float two = 2.0;
+        float highExpo = powerf( two, 3.0);
+        float specIntensity = powerf(specCoefficient, highExpo);
+        const float ambIntensity = 1.0;
+        vec3 purple = vec3(1.0, 0.0, 1.0);
+        vec3 blue = vec3(0.0, 0.0, 1.0);
+        vec3 phong_color = vec3((ambIntensity * blue) + ((difIntensity * purple) + (specIntensity * purple)) * light.color);
+        
+        
+ 
         
         return vec4(normal * 0.5 + 0.5, 1.0);
         
