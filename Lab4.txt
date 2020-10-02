@@ -1,4 +1,5 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
+
 // Title: Lab4 Lighting & Shading techniques
 // Authors: Andrew Barnett & Shakeem Brown
 
@@ -266,7 +267,6 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
         
         return sphere_color; // returns the sphere and the three lights
     }
-    
     
 	// BACKGROUND
 	const vec3 warm = vec3(0.8, 0.4, 0.2), cool = vec3(0.2, 0.4, 0.8); // the background colors
