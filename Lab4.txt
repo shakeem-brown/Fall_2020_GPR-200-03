@@ -1,5 +1,10 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
 
+/*
+	Title:    Lab 4
+	Authors:  Andrew Barnett & Shakeem Brown 
+*/
+
 // asPoint: promote a 3D vector into a 4D vector representing a point (w=1)
 //    point: input 3D vector
 vec4 asPoint(in vec3 point)
@@ -75,9 +80,9 @@ void initSphere(out sSphere sphere, in vec3 center, in float radius)
 } 
 
 // utlility functions
-float lenSQ (vec2 x)
+float lenSQ (vec2 a)
 {
- 	return dot(x, x);   
+ 	return ((a.x * a.x) + (a.y * a.y));   
 }
 
 float pow2f(float x)
@@ -111,14 +116,25 @@ struct pointLight
 
 void initLight(out pointLight light, in vec3 center, in float intensity, in vec3 color)
 {
-    light.center = asPoint(center);
+    light.center = asOffset(center);
     light.color = color;
     light.intensity = intensity;
 }
 
-void lightMaker()
+float dotproduct(in vec3 a, in vec3 b)
 {
+    return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z));
+}
+
+
+
+vec4 lightMaker(in vec4 light1, in vec4 light2, in vec4 light3)
+{
+    const float ambIntensity = 0.1;
+    const float alpha = 1.0;
+    vec4 blue = vec4(0.0, 0.0, 1.0, alpha);
     
+    return vec4((ambIntensity * blue) + light1 + light2 + light3);
 }
 
 vec4 calcLight(in vec4 rayOrigin, in sSphere sphere, in vec3 sPos, in vec3 sNorm, in pointLight light)
@@ -127,40 +143,39 @@ vec4 calcLight(in vec4 rayOrigin, in sSphere sphere, in vec3 sPos, in vec3 sNorm
     	// Test
         //colors
    		vec3 yellow = vec3(1.0, 1.0, 0.0);
-   	    vec3 blue = vec3(0.0, 0.0, 1.0);
     	vec3 red = vec3(1.0, 0.0, 0.0);
     	
     
         vec3 lightPos = normalize(light.center.xyz - sPos);
-        float difCoefficient = max(0.0, dot(sNorm, lightPos));
+        float difCoefficient = max(0.0, dotproduct(sNorm, lightPos));
         
         vec3 lightDis = vec3(light.center.xyz - sphere.radius); 
         vec3 attenuation = 1.0 / (1.0 + (lightDis / light.intensity) +  pow2vec3(lightDis) / pow2f(light.intensity));
         vec3 difIntensity = vec3(difCoefficient * attenuation);
     
-        // Returning
-        vec3 lam_color = vec3(difIntensity * sNorm * light.color);
+       
+        // vec3 lam_color = vec3(difIntensity * sNorm * light.color);
         
         vec3 viewVec = normalize(rayOrigin.xyz - sPos);
         vec3 refLightVec = reflect(-(lightPos), sNorm);
         
-        float specCoefficient = max(0.0, dot(viewVec, refLightVec));
+        float specCoefficient = max(0.0, dotproduct(viewVec, refLightVec));
         const float two = 2.0;
         float highExpo = powerf( two, 3.0);
         float specIntensity = powerf(specCoefficient, highExpo);
-        const float ambIntensity = 0.1;
+      
         
-        
-        vec3 phong_color = vec3((ambIntensity * blue) + ((difIntensity * red) + (specIntensity * yellow)) * light.color);
+       //vec3 phong_color = vec3((ambIntensity * blue) + ((difIntensity * red) + (specIntensity * yellow)) * light.color);
         
         vec3 half_vector = normalize(lightPos + viewVec);
-        float blinnCoefficient = dot(sNorm, half_vector);
+        float blinnCoefficient = dotproduct(sNorm, half_vector);
         float blinnHighExpo = (4.0 * highExpo);
         float blinnSpecIntesnity = powerf(blinnCoefficient, blinnHighExpo);
-        vec3 blinn_phong_color =  vec3((ambIntensity * blue) + ((difIntensity * red) + (blinnSpecIntesnity * yellow)) * light.color);
+        vec3 blinn_phong_color =  vec3(((difIntensity * red) + (blinnSpecIntesnity * yellow)) * light.color);
     
-        //Testing colors
-        vec4 showColor = vec4(blinn_phong_color, ambIntensity);
+       
+        vec4 showColor = vec4(blinn_phong_color, 1.0);
+    
         return showColor;
 }
     
@@ -169,7 +184,7 @@ vec4 calcLight(in vec4 rayOrigin, in sSphere sphere, in vec3 sPos, in vec3 sNorm
 //    rayOrigin:    input ray origin
 vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
 {
-    const float radius = 0.5;
+    const float radius = 0.7;
     
     // Sphere SCENE
     sSphere sphere;
@@ -178,12 +193,12 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
     // Light1 SCENE
     pointLight light1;
     light1.intensity = 0.5;
-    initLight(light1, vec3(100.0, 100.0, 1.0), light1.intensity, vec3(1.0, 0.0, 0.0)); // red
+    initLight(light1, vec3(100.0, 1000.0, 1.0), light1.intensity, vec3(1.0, 0.0, 0.0)); // red
     
     // Light2 SCENE
     pointLight light2;
     light2.intensity = 0.5;
-    initLight(light2, vec3(14.0, 0.0, 2.0), light2.intensity, vec3(1.0, 1.0, 0.0)); // yellow
+    initLight(light2, vec3(100.0, 1.0, 1.0), light2.intensity, vec3(1.0, 1.0, 0.0)); // yellow
     
     // Light3 SCENE
     pointLight light3;
@@ -211,9 +226,7 @@ vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
         vec4 light2_color = calcLight(rayOrigin, sphere, position, normal, light2);
         vec4 light3_color = calcLight(rayOrigin, sphere, position, normal, light3);
         
-        sphere_color += light1_color;
-        sphere_color += light2_color;
-        sphere_color += light3_color;
+        sphere_color += lightMaker(light1_color, light2_color, light3_color);
         
         return sphere_color;
         
