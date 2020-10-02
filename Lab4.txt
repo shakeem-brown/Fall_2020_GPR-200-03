@@ -1,10 +1,5 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
 
-/*
-	Title:    Lab 4
-	Authors:  Andrew Barnett & Shakeem Brown 
-*/
-
 // asPoint: promote a 3D vector into a 4D vector representing a point (w=1)
 //    point: input 3D vector
 vec4 asPoint(in vec3 point)
@@ -66,117 +61,147 @@ void calcRay(out vec4 rayDirection, out vec4 rayOrigin,
     rayDirection = asOffset(viewport - eyePosition);
 }
 
+// The sphere object
 struct sSphere
 {
-  vec4 center;
-  float radius;
+  vec4 center; // creates the instance of the sphere's center
+  float radius; // creates the instance of the sphere's radius
 };
 
+ // initSphere: intializing the the instance of the sphere from the sSphere structure
+ //		center: the sphere's center
+ //		radius: the sphere's radius
 void initSphere(out sSphere sphere, in vec3 center, in float radius)
 {
-    sphere.center = asPoint(center);
-    sphere.radius = radius;
+    sphere.center = asPoint(center); // intalizing the sphere's center as the point of its center
+    sphere.radius = radius; // intialzing the radius of the sphere
 
 } 
 
-// utlility functions
+// lenSQ: Finds the dot product of a length 'a'
+//		a: a vector2 being dot product
 float lenSQ (vec2 a)
 {
- 	return ((a.x * a.x) + (a.y * a.y));   
+ 	return ((a.x * a.x) + (a.y * a.y));   // the dot product formula being used
 }
 
+// pow2f: finds the float 'x' being squared
+//		x: the number that is being squared
 float pow2f(float x)
 {
- 	return (x * x);   
+ 	return (x * x);   // returns the float being squared
 }
 
+// pow2vec3: finds the vec3 'x' squared
+//		x: the vec3 that is being squared
 vec3 pow2vec3(vec3 x)
 {
- 	return (x * x);   
+ 	return (x * x);   // returns the vec3 x squared
 }
 
+// powerVec: finds a vec3 number raised to a vec3 exponent
+//		number: the vec3 base
+//		exponent: the vec3 exponent
 vec3 powerVec(vec3 number, vec3 exponent)
 {
- 	return pow(number, exponent);
+ 	return pow(number, exponent); // returning the vec3 being rasied to the vec3 exponent
 }
 
+// powerf: finds a float number raised to a float exponent
+//		number: the float base
+//		exponent: the float exponent
 float powerf(float number, float exponent)
 {
- 	return pow(number, exponent);
+ 	return pow(number, exponent); // returning the float being rasied to the float exponent
 }
 
-//
-
-struct pointLight
-{
-    vec4 center;
-    vec3 color; 
-    float intensity;  
-};
-
-void initLight(out pointLight light, in vec3 center, in float intensity, in vec3 color)
-{
-    light.center = asOffset(center);
-    light.color = color;
-    light.intensity = intensity;
-}
-
+// dotproduct: finds the dotproduct of two vec3s
+//		a: the first vec3
+//		b: the second vec3
 float dotproduct(in vec3 a, in vec3 b)
 {
-    return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z));
+    return ((a.x * b.x) + (a.y * b.y) + (a.z * b.z)); // the dot product formula being used
 }
 
+// The light object
+struct pointLight
+{
+    vec4 center; // creates an instance of the light's center
+    vec3 color; // creates an instance of the color of the light
+    float intensity; // creates an instance of the intenisity of the light
+};
 
+// initLight: intializing the the instance of the light from the pointLight structure
+//		center: the light's center
+//		intensity: the light's intensity
+//		color: the light's color
+void initLight(out pointLight light, in vec3 center, in float intensity, in vec3 color)
+{
+    light.center = asOffset(center); // intializing the light's center as the offset of the sphere's center
+    light.color = color; // intalizing the light's color
+    light.intensity = intensity; // intalizing the light's center 
+}
 
+// lightMaker: Stores the three lights and their base values.
+//		light1: is the light1
+//		light2: is the light2
+//		light3: is the light3
 vec4 lightMaker(in vec4 light1, in vec4 light2, in vec4 light3)
 {
-    const float ambIntensity = 0.1;
-    const float alpha = 1.0;
-    vec4 blue = vec4(0.0, 0.0, 1.0, alpha);
+    const float ambIntensity = 0.1; // defines the light's intensity
+    const float alpha = 1.0; // defines the color's alpha
+    vec4 blue = vec4(0.0, 0.0, 1.0, alpha); // the light's color in this case blue
     
-    return vec4((ambIntensity * blue) + light1 + light2 + light3);
+    return vec4((ambIntensity * blue) + light1 + light2 + light3); // returns the 3 lights
 }
 
+//	calcLight: calculate the lights using mathimatical formulas
+//		rayOrigin: input ray origin
+//		sphere: inputs the sphere structure which stores the sphere's values
+//		sPos: inputs the sphere's position
+//		sNorm: inputs the sphere's normalized value
+//		light: inputs the light structure which stores the light's values
 vec4 calcLight(in vec4 rayOrigin, in sSphere sphere, in vec3 sPos, in vec3 sNorm, in pointLight light)
 {
-
-    	// Test
-        //colors
-   		vec3 yellow = vec3(1.0, 1.0, 0.0);
-    	vec3 red = vec3(1.0, 0.0, 0.0);
+		// Additional Light colors
+   		vec3 yellow = vec3(1.0, 1.0, 0.0); // yellow color
+    	vec3 red = vec3(1.0, 0.0, 0.0); // red color
+    	const float alpha = 1.0; // the alpha of a color
     	
     
-        vec3 lightPos = normalize(light.center.xyz - sPos);
-        float difCoefficient = max(0.0, dotproduct(sNorm, lightPos));
+        vec3 lightPos = normalize(light.center.xyz - sPos); // calculates the light's postion
+        float difCoefficient = max(0.0, dotproduct(sNorm, lightPos)); // calculates the diffuse coefficient
         
-        vec3 lightDis = vec3(light.center.xyz - sphere.radius); 
-        vec3 attenuation = 1.0 / (1.0 + (lightDis / light.intensity) +  pow2vec3(lightDis) / pow2f(light.intensity));
-        vec3 difIntensity = vec3(difCoefficient * attenuation);
+        vec3 lightDis = vec3(light.center.xyz - sphere.radius); // calculauted the light's distance
+    
+        vec3 attenuation = 1.0 / (1.0 + (lightDis / light.intensity) +
+                                  pow2vec3(lightDis) / pow2f(light.intensity)); // calculates the attenuation
+        vec3 difIntensity = vec3(difCoefficient * attenuation); // calculates the diffuse intensity
     
        
-        // vec3 lam_color = vec3(difIntensity * sNorm * light.color);
+        // vec3 lam_color = vec3(difIntensity * sNorm * light.color); // the implementation of lam_color
         
-        vec3 viewVec = normalize(rayOrigin.xyz - sPos);
-        vec3 refLightVec = reflect(-(lightPos), sNorm);
+        vec3 viewVec = normalize(rayOrigin.xyz - sPos); // calculates the view vector
+        vec3 refLightVec = reflect(-(lightPos), sNorm); // calculates the refelctive light vector
         
-        float specCoefficient = max(0.0, dotproduct(viewVec, refLightVec));
-        const float two = 2.0;
-        float highExpo = powerf( two, 3.0);
-        float specIntensity = powerf(specCoefficient, highExpo);
+        float specCoefficient = max(0.0, dotproduct(viewVec, refLightVec)); // caculates the specular coefficient
+        const float two = 2.0; // defining a base of two
+        float highExpo = powerf( two, 3.0); // defining the high exponent
+        float specIntensity = powerf(specCoefficient, highExpo); // calculates the specular intensity
       
         
-       //vec3 phong_color = vec3((ambIntensity * blue) + ((difIntensity * red) + (specIntensity * yellow)) * light.color);
+       //vec3 phong_color = vec3((ambIntensity * blue) +
+       //             ((difIntensity * red) + (specIntensity * yellow)) * light.color); // the implementation of the phong color
         
-        vec3 half_vector = normalize(lightPos + viewVec);
-        float blinnCoefficient = dotproduct(sNorm, half_vector);
-        float blinnHighExpo = (4.0 * highExpo);
-        float blinnSpecIntesnity = powerf(blinnCoefficient, blinnHighExpo);
-        vec3 blinn_phong_color =  vec3(((difIntensity * red) + (blinnSpecIntesnity * yellow)) * light.color);
+        vec3 half_vector = normalize(lightPos + viewVec); // calculates half the vector
+        float blinnCoefficient = dotproduct(sNorm, half_vector); // calculates the blinn Coefficient
+        float blinnHighExpo = (4.0 * highExpo); // calculates the blinn coefficient
+        float blinnSpecIntesnity = powerf(blinnCoefficient, blinnHighExpo); // calculaute the blinn specular intensity
+        vec3 blinn_phong_color =  vec3(((difIntensity * red) + (blinnSpecIntesnity * yellow)) * light.color); // calculautes the blinn phong color
     
-       
-        vec4 showColor = vec4(blinn_phong_color, 1.0);
+        vec4 showColor = vec4(blinn_phong_color, alpha); // stores the blinn color int a vector 4 using the alpha
     
-        return showColor;
+        return showColor; // returns the ligh's final color
 }
     
 // calcColor: calculate the color of a pixel given a ray
@@ -184,59 +209,66 @@ vec4 calcLight(in vec4 rayOrigin, in sSphere sphere, in vec3 sPos, in vec3 sNorm
 //    rayOrigin:    input ray origin
 vec4 calcColor(in vec4 rayDirection, in vec4 rayOrigin)
 {
-    const float radius = 0.7;
-    
+    // light colors
+    vec3 red = vec3(1.0, 0.0, 0.0); // the color red
+    vec3 yellow = vec3(1.0, 1.0, 0.0); // the color yellow
+    vec3 cyan = vec3(0.0, 1.0, 1.0); // the color cyan
+
     // Sphere SCENE
-    sSphere sphere;
-    initSphere(sphere, vec3(0.0, 0.0, -4.0), radius);
+    sSphere sphere; // creating the sphere's object
+    sphere.radius = 0.7; // The value of the sphere's radius
+    initSphere(sphere, vec3(0.0, 0.0, -4.0), sphere.radius); // the creation of the sphere
     
     // Light1 SCENE
-    pointLight light1;
-    light1.intensity = 0.5;
-    initLight(light1, vec3(100.0, 1000.0, 1.0), light1.intensity, vec3(1.0, 0.0, 0.0)); // red
+    pointLight light1; // creating the light one obeject
+    light1.intensity = 0.5; // the value of the light1's intensity
+    initLight(light1, vec3(100.0, 1000.0, 1.0), light1.intensity, red); // the creation of the red light
     
     // Light2 SCENE
-    pointLight light2;
-    light2.intensity = 0.5;
-    initLight(light2, vec3(100.0, 1.0, 1.0), light2.intensity, vec3(1.0, 1.0, 0.0)); // yellow
+    pointLight light2; // creating the light two object
+    light2.intensity = 0.5; // the value of the light2's intensity
+    initLight(light2, vec3(100.0, 1.0, 1.0), light2.intensity, yellow); // the creation of the yellow light
     
     // Light3 SCENE
-    pointLight light3;
-    light3.intensity = 0.5;
-    initLight(light3, vec3(7.0, -12.0, 40.0), light3.intensity, vec3(0.0, 1.0, 1.0)); // cyan
-    
-    
-    
+    pointLight light3; // creating the light three object
+    light3.intensity = 0.5; // the value of the light3's intensity
+    initLight(light3, vec3(7.0, -12.0, 40.0), light3.intensity, cyan); // the creation of the cyan light
     
     //TEST
-    vec3 dp;
-    dp.xy = rayDirection.xy - sphere.center.xy;
-    float lSq = lenSQ(dp.xy);
-    float rSq = sphere.radius * sphere.radius;
-        
+    vec3 dp; // the instance of the vec3 dotproduct called "dp"
+    dp.xy = rayDirection.xy - sphere.center.xy; // intialazing the dotproduct with the xy of the ray
+    											// direction and the sphere center
+    float lSq = lenSQ(dp.xy); // the length squared of the dot product
+    float rSq = sphere.radius * sphere.radius; // the radius squared
+       
+    // INSIDE OF THE SPHERE
     if (lSq <= rSq)
     {
-        dp.z = rSq - lSq;
+        dp.z = rSq - lSq; // setting the dotproduct of z to the radius square minus the length square
         
-        vec3 position = sphere.center.xyz + vec3(dp.x, dp.y, sqrt(dp.z)); // zSq -> 
-        vec3 normal = vec3 (position - sphere.center.xyz) / sphere.radius; // normalizing it  
-        vec4 sphere_color = vec4(normal * 0.5 + 0.5, 1.0);
+        vec3 position = sphere.center.xyz + vec3(dp.x, dp.y, sqrt(dp.z)); // the position of the sphere
+        vec3 normal = vec3 (position - sphere.center.xyz) / sphere.radius; // normalizing the sphere
+        vec4 sphere_color = vec4(normal * 0.5 + 0.5, 1.0); // the sphere's color
         
-        vec4 light1_color = calcLight(rayOrigin, sphere, position, normal, light1);
+        // intialazing the light1 to the light of the lightMaker function
+        vec4 light1_color = calcLight(rayOrigin, sphere, position, normal, light1); 
+        
+        // intialazing the light2 to the light of the lightMaker function
         vec4 light2_color = calcLight(rayOrigin, sphere, position, normal, light2);
+        
+        // intialazing the light2 to the light of the lightMaker function
         vec4 light3_color = calcLight(rayOrigin, sphere, position, normal, light3);
         
+     	// Adding the light to the sphere image
         sphere_color += lightMaker(light1_color, light2_color, light3_color);
         
-        return sphere_color;
-        
+        return sphere_color; // returns the sphere and the three lights
     }
     
     
 	// BACKGROUND
-	const vec3 warm = vec3(0.8, 0.4, 0.2), cool = vec3(0.2, 0.4, 0.8);
-	return vec4(mix(warm, cool, rayDirection.y), 1.0);
-    //return vec4(0.5); // gray background
+	const vec3 warm = vec3(0.8, 0.4, 0.2), cool = vec3(0.2, 0.4, 0.8); // the background colors
+	return vec4(mix(warm, cool, rayDirection.y), 1.0); // returning the mixure of the colors
 }
 
 // mainImage: process the current pixel (exactly one call per pixel)
@@ -261,5 +293,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     	             fragCoord, iResolution.xy);
     calcRay(rayDirection, rayOrigin, vec3(0.0), viewport);
     
+    // The image being outputed
     fragColor += calcColor(rayDirection, rayOrigin);
 }
