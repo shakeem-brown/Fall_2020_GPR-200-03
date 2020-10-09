@@ -386,8 +386,11 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time)
     // texture coordinate / screen space coordinante
     vec2 uv = px.xy / res.xy;
     float xPos = absolute_value(sin(time)); // x position according to the time
+    vec2 screenRez = res; // the screen resolution
+    vec3 cubeLoc = ray.direction.xyz; // the cube location
     
-    vec2 screenRez = res;
+    // Declaration of the ballRoom image
+    vec4 ballRoom = vec4(texture(iChannel2, cubeLoc));
     
     // cCoss Fade Effect
     //return crossFadeEffect(uv.x, xPos, dirtImage, stoneImage);
@@ -398,8 +401,10 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time)
     //return stoneImage;
     
     // Lampert Shading Effect
-    return shadingEffect(location, time, uv.xy, screenRez, stoneImage);
+    //return shadingEffect(location, time, uv.xy, screenRez, stoneImage);
     
+    // the 3dmap cupe implementation
+    return ballRoom;
     
 }
 
