@@ -203,6 +203,11 @@ vec4 crossFadeAider(in vec4 image1, in vec4 image2, in float time)
     return image1 * (1.0 - time_scalar * time) + image2 * time_scalar * time;
 }
 
+/*
+	Inspired by @ stomp
+        			https://www.shadertoy.com/view/Xt2Szz
+*/
+
 // crossFadeEffect: implements the transition from one image to the other
 //		x_textureCoord: is the uv's x position
 //		theXPosition: x position of the transition according to  time
@@ -238,16 +243,38 @@ vec4 crossFadeEffect(in float x_textureCoord, in float theXPosition, in vec4 tex
     }
 }
 
-vec4 distortionEffect(in float x_textureCoord, in float y_textureCoord, in float time)
+/*
+	Inspiration by @ creikey
+					https://www.shadertoy.com/view/3lGXzG
+*/
+
+// distortionEffect: creates the distorted behavior according to the uv's xand y possion
+//		x_textureCoord: is the uv's x position
+//		y_textureCoord: is the uv's y position
+//		time: the time
+//		location: is the pixel coordinate but scalled to the resolution.
+vec4 distortionEffect(in float x_textureCoord, in float y_textureCoord, in float time, in vec2 location)
 {
-    x_textureCoord += sin(time);
-    y_textureCoord += cos(time);
-    x_textureCoord += cos(x_textureCoord * 10.0 + time) * 0.3;
-    y_textureCoord += sin(y_textureCoord * 5.0 + x_textureCoord * 4.0 + time * 1.3) * 0.4;
+    x_textureCoord += sin(time); // setting the x coord of the texture coord according to time
+    y_textureCoord += cos(time); // setting the y coord of the texture coord according to time
     
+    float wave_speed = 1.5; // the wave speed of distortion
+    float numberOf_waves = 0.75; // number of waves
+    float oppisite_waves_speed = 2.0; // oppsitve wave ossilation
+    float y_wave = 5.0; // y direction waves
+    float x_wave = 10.0; // x direction waves
+    
+    // reassigning the x coord to a wave like pattern
+    x_textureCoord += cos(x_textureCoord * x_wave + time) * numberOf_waves; 
+    // reassigning the y coord to a wave like pattern
+    y_textureCoord += sin(y_textureCoord * y_wave + x_textureCoord * oppisite_waves_speed + time * wave_speed) * numberOf_waves;
+    
+    //Combining the x and y coordinates of the texture coord to a vec2
     vec2 newUV = vec2(x_textureCoord, y_textureCoord);
-    vec4 distortedImage = vec4 (texture(iChannel1, newUV));
-    return distortedImage;
+    newUV *= location; // setting the uv to the frame location of the screen
+    
+    vec4 distortedImage = vec4 (texture(iChannel1, newUV)); // adds the texture with the new uv
+    return distortedImage; // returns the distorted image
 }
 
 // calcColor: calculate the color of current pixel
@@ -257,9 +284,9 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time)
 {
     sCoord px = vp.pixelCoord; // the pixel coordinate
     sDCoord res = iChannelResolution[0].xy; // the resolution
-    sScalar ratio = res.y * vp.resolutionInv.y;
-    sCoord location = px / res;
-    location = ratio * location;
+    sScalar ratio = res.y * vp.resolutionInv.y; // the scalar ratio according to the resoltion
+    sCoord location = px / res; // the location of the screen according to the pixel coord and the res
+    location = ratio * location; // multiplying by the ratio
     
     //Testing for lighting
     vec4 innerVortexImage = vec4(normalize(vec3(vp.viewportPoint.xy, 0.0)), 1.0);
@@ -278,7 +305,9 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time)
     //return crossFadeEffect(uv.x, xPos, dirtImage, stoneImage);
     
     // distortionEffect
-    return distortionEffect(uv.x, uv.y, time);
+    return distortionEffect(uv.x, uv.y, time, location);
+    // comparision for distortion effect
+    //return stoneImage;
     
     
 }
