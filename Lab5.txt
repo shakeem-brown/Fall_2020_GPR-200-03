@@ -1,6 +1,6 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
-// Title: Intro to Textures & Image Processing
-// Author: Shakeem Brown
+// Modification Title: Intro to Textures & Image Processing
+// Modification Author: Shakeem Brown
 
 //------------------------------------------------------------
 // TYPE ALIASES & UTILITY FUNCTIONS
@@ -277,6 +277,56 @@ vec4 distortionEffect(in float x_textureCoord, in float y_textureCoord, in float
     return distortedImage; // returns the distorted image
 }
 
+/*
+	Function Entirely by @ Impossible 
+				https://www.shadertoy.com/view/4tfGWl
+*/
+vec3 dither(in vec2 vScreenPos)
+{
+	vec3 vDither = vec3(dot(vec2(171.0, 231.0), vScreenPos.xy + vec2(iTime)));
+	vDither.rgb = fract(vDither.rgb / vec3(103.0, 71.0, 97.0)) - vec3(0.5, 0.5, 0.5);
+	return ( vDither.rgb / 255.0 ) * 0.375;
+}
+
+/*
+	Inspired by: @ Hexus
+					https://www.shadertoy.com/view/MsyXz3
+*/
+
+vec4 shadingEffect(in vec2 location, in float time, in vec2 xy_textureCoord, in vec2 resolution, in vec4 image)
+{
+    vec2 px = xy_textureCoord * resolution;
+    resolution = iChannelResolution[0].xy;
+    
+    vec4 light_color = vec4(0.5); // Gray Scaled light
+    vec4 light_ambient_color = vec4(0.0); // black light
+    vec3 the_light = vec3(0.1, 2.0, 5.0); // the light vector
+    float intensity = 15.0; // the intensity of the light
+    
+    float light_radius = 128.0; // the radius of the light
+    light_radius += sin(time * 3.0) * 50.0; // the flickering effect
+    
+    vec3 delta = vec3(location - xy_textureCoord, location.x);
+    delta.x /= light_radius / resolution.x;
+    delta.y /= light_radius / resolution.y;
+	
+    // The distance from the light to the image
+    float fragDistoLight = length(delta);
+    vec3 d = light_color.rbg * light_color.a;
+    vec3 a = light_ambient_color.rgb * light_ambient_color.a;
+    
+    // Calculates the attenuation of the light
+    float attenuation = intensity / (the_light.x + (the_light.y * fragDistoLight) +
+                                     (the_light.z * fragDistoLight * fragDistoLight));
+	
+    vec3 new_light = a + d * attenuation;
+    new_light = pow(new_light, vec3(1.0 / 2.2));
+    new_light += dither(px.xy) * 6.0;
+    
+    return vec4(vec3(image.r) * new_light, image.a);
+
+}
+
 // calcColor: calculate the color of current pixel
 //	  vp:  input viewport info
 //	  ray: input ray info
@@ -301,13 +351,18 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time)
     vec2 uv = px.xy / res.xy;
     float xPos = absolute_value(sin(time)); // x position according to the time
     
-    // crossFadeEffect
+    vec2 screenRez = res;
+    
+    // cCoss Fade Effect
     //return crossFadeEffect(uv.x, xPos, dirtImage, stoneImage);
     
-    // distortionEffect
-    return distortionEffect(uv.x, uv.y, time, location);
-    // comparision for distortion effect
+    // Distortion Effect
+    //return distortionEffect(uv.x, uv.y, time, location);
+    // Comparision for Distortion Effect
     //return stoneImage;
+    
+    // Lampert Shading Effect
+    return shadingEffect(location, time, uv.xy, screenRez, stoneImage);
     
     
 }
