@@ -238,15 +238,25 @@ vec4 crossFadeEffect(in float x_textureCoord, in float theXPosition, in vec4 tex
     }
 }
 
-
+vec4 distortionEffect(in float x_textureCoord, in float y_textureCoord, in float time)
+{
+    x_textureCoord += sin(time);
+    y_textureCoord += cos(time);
+    x_textureCoord += cos(x_textureCoord * 10.0 + time) * 0.3;
+    y_textureCoord += sin(y_textureCoord * 5.0 + x_textureCoord * 4.0 + time * 1.3) * 0.4;
+    
+    vec2 newUV = vec2(x_textureCoord, y_textureCoord);
+    vec4 distortedImage = vec4 (texture(iChannel1, newUV));
+    return distortedImage;
+}
 
 // calcColor: calculate the color of current pixel
 //	  vp:  input viewport info
 //	  ray: input ray info
 color4 calcColor(in sViewport vp, in sRay ray, in float time)
 {
-    sCoord px = vp.pixelCoord;
-    sDCoord res = iChannelResolution[0].xy;
+    sCoord px = vp.pixelCoord; // the pixel coordinate
+    sDCoord res = iChannelResolution[0].xy; // the resolution
     sScalar ratio = res.y * vp.resolutionInv.y;
     sCoord location = px / res;
     location = ratio * location;
@@ -258,14 +268,19 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time)
     vec4 dirtImage = vec4(texture(iChannel0, location).rgbr);
     
     // Declaration of the stone image
-    vec4 StoneImage = vec4(texture(iChannel1, location).rgbr);
+    vec4 stoneImage = vec4(texture(iChannel1, location).rgbr);
     
     // texture coordinate / screen space coordinante
     vec2 uv = px.xy / res.xy;
     float xPos = absolute_value(sin(time)); // x position according to the time
     
     // crossFadeEffect
-    return crossFadeEffect(uv.x, xPos, dirtImage, StoneImage);
+    //return crossFadeEffect(uv.x, xPos, dirtImage, stoneImage);
+    
+    // distortionEffect
+    return distortionEffect(uv.x, uv.y, time);
+    
+    
 }
 
 
