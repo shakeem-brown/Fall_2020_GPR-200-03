@@ -273,7 +273,7 @@ float squareShape (in vec3 centerShape, in float size, in vec3 location, in vec2
 vec4 crossFadeEffect(in float x_textureCoord, in float theXPosition, in vec4 texture1, in vec4 texture2)
 {
     vec4 tempVec = vec4(0.0, 0.0, 0.0, 1.0); // temporay vec4 to allow for texture change
-    float width = 0.001; // the width of the transition line
+    float width = 0.00000000001; // the width of the transition line
     
     if (x_textureCoord > (theXPosition - width) && x_textureCoord < (theXPosition + width))
     {
