@@ -242,10 +242,21 @@ void initCube(out cCube cube, in vec3 center, in float side_length)
 //		center: the cube's center
 //		size: the size of the image
 //		location: the the location of the object
-float squareShape (in vec3 centerShape, in float size, in vec3 location)
+//		xy_textureCoord: is the uv value
+//		resolution: is the screen's resolution
+//		time: is the time
+float squareShape (in vec3 centerShape, in float size, in vec3 location, in vec2 xy_textureCoord, in vec2 resolution, in float time)
 {
+    vec2 px = xy_textureCoord * resolution; // the pixel coordinant
+    xy_textureCoord = (px.xy - 0.5 * resolution.xy) / resolution.y; // preparing for rotation
+    // setting the uv accorrding to time
+    xy_textureCoord.y = cos(time) * 0.5 * xy_textureCoord.x + sin(time) * xy_textureCoord.y;
+    px = xy_textureCoord * resolution; // reassigning the uv value for the px coord
+     
     location = abs(location - centerShape) * 2.0; // setting the new location
     float square_shape = step(location.x, size) * step(location.y, size); // square image
+    
+    
     return square_shape;// returns the square image
 }
 
@@ -434,15 +445,15 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time)
     // Declaration of the ballroom background
     vec4 ballRoom = vec4(texture(iChannel2, cubeLoc));
     
-    float square = squareShape (cube.center.xyz, 0.8, cubeLoc.xyz);
-    const float TRUE = 1.0;
+    float square = squareShape (cube.center.xyz, 0.8, cubeLoc.xyz, uv, res, time); // the square image
+    const float TRUE = 1.0; // usful to determine if expression is true
     
     // INSIDE OF THE CUBE
     if (square == TRUE)
     {
         // the cube's texture
-        vec4 cube_texture = distortionEffect(uv.x, uv.y, time, location);
-        return cube_texture;
+        vec4 cube_texture = distortionEffect(uv.x, uv.y, time, location); // the distorted square
+        return cube_texture; // returns distorted cube
     }
     
     // cCoss Fade Effect
