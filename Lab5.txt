@@ -446,31 +446,55 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time)
     vec4 ballRoom = vec4(texture(iChannel2, cubeLoc));
     
     float square = squareShape (cube.center.xyz, 0.8, cubeLoc.xyz, uv, res, time); // the square image
-    const float TRUE = 1.0; // usful to determine if expression is true
     
-    // INSIDE OF THE CUBE
-    if (square == TRUE)
+    // SCENE CASES
+    const float SCENE_ONE = 1.0; // cCross Fade Effect
+    const float SCENE_TWO = 2.0; // Distortion Effect
+    const float SCENE_THREE = 3.0; // Lampert Shading Effect
+    const float SCENE_FOUR = 4.0; // the cube's texture
+    
+    //*****************************************************************************************************
+    // CHANGE THIS TO UPDATE SCENE
+    float scene = 1.0; // Change this to update scenes output
+    // ****************************************************************************************************
+    
+    if (scene == SCENE_ONE) // cCross Fade Effect
     {
-        // the cube's texture
-        vec4 cube_texture = distortionEffect(uv.x, uv.y, time, location); // the distorted square
-        return cube_texture; // returns distorted cube
+        // cCross Fade Effect
+        return crossFadeEffect(uv.x, xPos, dirtImage, stoneImage);
     }
-    
-    // cCoss Fade Effect
-    //return crossFadeEffect(uv.x, xPos, dirtImage, stoneImage);
-    
-    // Distortion Effect
-    //return distortionEffect(uv.x, uv.y, time, location);
-    // Comparision for Distortion Effect
-    //return stoneImage;
-    
-    // Lampert Shading Effect
-    //return shadingEffect(location, time, uv.xy, screenRez, stoneImage);
-    
-    // 3D Cube Map
-    return ballRoom;
-    
-    
+    else if (scene == SCENE_TWO) // Distortion Effect
+    {
+        // Distortion Effect
+        return distortionEffect(uv.x, uv.y, time, location);
+        
+        // Comparision for Distortion Effect
+        //return stoneImage;
+    }
+    else if (scene == SCENE_THREE) // Lampert Shading Effect
+    {
+        // Lampert Shading Effect
+        return shadingEffect(location, time, uv.xy, screenRez, stoneImage);
+    }
+    else if (scene == SCENE_FOUR) // the cube's texture
+    {
+        const float TRUE = 1.0;
+        // INSIDE OF THE CUBE
+        if (square == TRUE)
+        {
+            // the cube's texture
+            vec4 cube_texture = distortionEffect(uv.x, uv.y, time, location); // the distorted square
+            return cube_texture; // returns distorted cube
+        }
+        
+        // 3D Cube Map
+        return ballRoom;
+    }
+    else // defult image output
+    {
+        vec4 purple = vec4(0.25, 0.0, 1.0, 1.0); // the color purple
+        return purple; // returns the color purple
+    }
 }
 
 
