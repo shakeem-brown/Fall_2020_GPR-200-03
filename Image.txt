@@ -1,0 +1,26 @@
+// GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
+//  -> IMAGE TAB (final)
+
+//------------------------------------------------------------
+// SHADERTOY MAIN
+
+// mainImage: process the current pixel (exactly one call per pixel)
+//    fragColor: output final color for current pixel
+//    fragCoord: input location of current pixel in image (in pixels)
+void mainImage(out color4 fragColor, in sCoord fragCoord)
+{
+    // texture space [0, 1)
+    // example: texture is 100 by 100 px, resInv = 0.01, 0.01
+    // 1/100 of the whole texture !!!
+    sDCoord pixelSizeInTextureSpace = 1.0 / iChannelResolution[0].xy;
+    
+    // setup
+    // test UV for input image
+    sCoord uv = fragCoord * pixelSizeInTextureSpace;
+    
+    sCoord uvUpRightCorner = (fragCoord + 0.5) * pixelSizeInTextureSpace;
+    
+    // TESTING
+    // set iChannel0 to 'Misc/Buffer A' and fetch sample
+    fragColor = texture(iChannel1, uv);
+}
