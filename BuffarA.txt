@@ -4,17 +4,25 @@
 //------------------------------------------------------------
 // RENDERING FUNCTIONS
 
+vec3 rotation(in float time, in sViewport vp)
+{
+    vec2 newUv = vp.uv;
+ 	float roat = time;
+    float y = newUv.y;
+    float x = newUv.x;
+    newUv.x = -sin(roat)*(x) + sin(roat)*(y);
+    newUv.y = -sin(roat)*(x) + sin(roat)*(y);
+    vec3 roatVec = vec3(abs(sin(roat)), (cos(1.2*newUv) - 0.1));
+    return roatVec;
+}
+
 // calcColor: calculate the color of current pixel
 //	  vp:  input viewport info
 //	  ray: input ray info
-color4 calcColor(in sViewport vp, in sRay ray)
+color4 calcColor(in sViewport vp, in sRay ray, in float time)
 {
-    // test inputs
-    //return color4(ray.direction.xyz == vp.viewportPoint.xyz); // pass
-    //return color4(lengthSq(vp.viewportPoint.xy) >= 0.25); // pass
-    //return color4(vp.uv, 0.0, 0.0);
-    //return color4(vp.ndc, 0.0, 0.0);
-    return asPoint(sBasis(vp.viewportPoint.xy, -vp.viewportPoint.z));
+    vec3 theRotation = ray.direction.xyz + rotation(time, vp);
+    return texture(iChannel0, theRotation);
 }
 
 
@@ -39,5 +47,5 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     // render
     initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
     initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
-    fragColor += calcColor(vp, ray);
+    fragColor += calcColor(vp, ray, iTime);
 }
