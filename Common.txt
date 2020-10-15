@@ -69,6 +69,30 @@ sScalar lengthSq(sVector x)
     return dot(x, x);
 }
 
+// vec3Cross: calculate the cross product of a vector 3 type
+//		a: the first vector3
+//		b: the second vector3
+vec3 vec3Cross(in vec3 a, in vec3 b)
+{
+    float i = (a.y * b.z) - (a.z * b.y); // the first slot
+    float j = (a.z * b.x) - (a.x * b.z); // the second slot
+    float k = (a.x * b.y) - (a.y * b.x); // the third slot
+    
+    vec3 crossProduct = vec3(i, j, k); // the cross product
+    
+    return crossProduct; // returns the cross product
+}
+
+// vec3Normal: calculates the unit vector of a vector 3
+//		a: the vector being normalzied
+vec3 vec3Normal(in vec3 a)
+{
+    // the calulations of the vecotr's length/ magnitude
+    float magnitude = ((a.x * a.x) + (a.y * a.y) + (a.z * a.z)) * 0.5;
+    vec3 unit_vector = a / magnitude; // the unit vector calculation
+    
+    return unit_vector; // returns the unit vector
+}
 
 //------------------------------------------------------------
 // VIEWPORT INFO

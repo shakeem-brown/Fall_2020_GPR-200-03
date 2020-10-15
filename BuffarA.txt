@@ -1,29 +1,57 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
 //  -> BUFFER A TAB (scene)
 
+/*
+	Modified by: Andrew Barnett & Shakeem Brown
+    Modification date: 10/15/2020
+	Modification Reason: Implemented the rotating cube map
+*/
+
 //------------------------------------------------------------
 // RENDERING FUNCTIONS
 
+/*
+	Inspired by: @ Takoa
+					https://www.shadertoy.com/view/MdXfDS
+*/
+// getRayDirection: gets the ray direction and does the normalization of the screen and ray
+//		origin: The origin of the camera's position
+//      screenPosition: the screen's position
+//		lookingAt: the location where the camera is pointing at
+//		up: the value that the camera is looking upwards/ fixed
+//		fov: the angle of rotation
 vec3 getRayDirection(vec2 screenPosition, vec3 origin, vec3 lookingAt, vec3 up, float fov)
 {
-    vec3 d = normalize(lookingAt - origin);
-    vec3 rayRight = normalize(cross(d, up));
+    vec3 d = vec3Normal(lookingAt - origin); // the distance
+    vec3 rayRight = vec3Normal(vec3Cross(d, up)); // the right of the the ray
     
-    return normalize(screenPosition.x * rayRight + screenPosition.y * up + 1.0 / tan(radians(fov / 2.0)) * d);
+    // the normalization of the screen position with the ray
+    vec3 normal = vec3(vec3Normal(screenPosition.x * rayRight + screenPosition.y * up + 1.0 / tan(radians(fov / 2.0)) * d));
+    
+    return normal; // returns the normal oof the screen with the ray
 }
 
 // calcColor: calculate the color of current pixel
 //	  vp:  input viewport info
 //	  ray: input ray info
+//    time: the time
 color4 calcColor(in sViewport vp, in sRay ray, in float time)
 {
-    float rotation_speed = 0.5;
-    vec3 center = vec3(0.0, 1.0, 0.0);
+    float rotation_speed = 0.5; // the rotation speed
+    vec3 center = vec3(0.0, 1.0, 0.0); // the center of the screen
+    
+    // the position of the normal of the screen
     vec2 position = (2.0 * vp.pixelCoord - vp.resolution.xy) / vp.resolution.y;
-    vec3 cameraPosition = vec3(0.0, 0.0, 0.0);
-    vec3 cameraUp = center;
+    vec3 cameraPosition = vec3(0.0, 0.0, 0.0); // the camera's position
+    vec3 cameraUp = center; // the camera's up in reltion to the center of the screen
+    
+    // The calculation of the screen panneling to the right
     vec3 cameraLookingAt = vec3(cos(rotation_speed * time), 0.0, sin(rotation_speed * time));
+    
+    // setting the new ray durection to be returned
     vec3 theRaydirection = getRayDirection(position, cameraPosition, cameraLookingAt, cameraUp, 90.0);
+    
+    // Returns the new raydirection and the 3d map image
     return texture(iChannel0, theRaydirection);
 }
 
