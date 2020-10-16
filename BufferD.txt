@@ -1,4 +1,35 @@
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+//CONTROL VARIABLES
+float uPower = 0.2; // barrel power - (values between 0-1 work well)
+float uSpeed = 5.0;
+float uFrequency = 5.0;
+
+vec2 Distort(vec2 p, float power, float speed, float freq)
 {
-    fragColor = vec4(0.5,0.5,1.0,1.0);
+    float theta  = atan(p.y, p.x);
+    float radius = length(p);
+    radius = pow(radius, power*sin(radius*freq-iTime*speed)+1.0);
+    p.x = radius * cos(theta);
+    p.y = radius * sin(theta);
+    return 0.5 * (p + 1.0);
+}
+
+void mainImage(out vec4 fragColor, in sCoord fragCoord )
+{
+   
+  vec2 mouse =  iMouse.xy/iResolution.xy;
+  vec2 uv = fragCoord.xy/iResolution.xy;
+  bool clicked = iMouse.z > 0.0;
+    
+  vec2 distortCenter = 2.0 * (uv - mouse);
+  vec2 textCoords = uv;
+    
+    
+  float d = length(distortCenter);
+  if (d < 1.0 && clicked){
+    textCoords = Distort(distortCenter, uPower, uSpeed, uFrequency);
+  }
+
+    
+  vec4 c = texture(iChannel1, textCoords );
+  fragColor = c;
 }
