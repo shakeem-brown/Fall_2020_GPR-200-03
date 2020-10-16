@@ -5,6 +5,7 @@
 	Modified by: Andrew Barnett & Shakeem Brown
     Modification date: 10/15/2020
 	Modification Reason: Implemented the rotating cube map
+    Title: The Buffer A, cube map
 */
 
 //------------------------------------------------------------

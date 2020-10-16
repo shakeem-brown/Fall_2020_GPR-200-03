@@ -1,4 +1,17 @@
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+/*
+	Authers: Andrew Barnett & Shakeem Brown
+	Title: The Buffer B, bright pass
+*/
+
+// mainImage: process the current pixel (exactly one call per pixel)
+//    fragColor: output final color for current pixel
+//    fragCoord: input location of current pixel in image (in pixels)
+void mainImage( out vec4 fragColor, in vec2 fragCoord ) 
 {
-    fragColor = vec4(0.5,0.5,1.0,1.0);
+    float alpha = 1.0; // the alpha
+    float brightness = 0.55; // the brightness
+	vec2 pixelCoord = fragCoord.xy / iResolution.xy; // the pixel coord vec2
+	vec4 greyScaleColor = texture(iChannel0, pixelCoord).rrrr; // greyscalled color of the texture
+	vec4 finalColor = vec4((greyScaleColor.xyz - brightness) * 2.0, alpha); // the output color
+	fragColor = clamp(finalColor, 0.0, alpha); // returned to image
 }
