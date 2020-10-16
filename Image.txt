@@ -20,7 +20,15 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     
     sCoord uvUpRightCorner = (fragCoord + 0.5) * pixelSizeInTextureSpace;
     
+    vec4 origImage = texture(iChannel0, uv);
+    vec4 effect = texture(iChannel1, uv);
+    
+    vec4 compAdd = origImage + effect; //  
+    vec4 compMix = vec4 (mix(origImage, effect, 1.0)); // the mix blend
+    vec4 compScreen = 1.0 - (1.0 - origImage) * (1.0 - effect); // Screen blend formula
+    vec4 compMult = origImage * effect; // Multiply blen formula
+    
     // TESTING
     // set iChannel0 to 'Misc/Buffer A' and fetch sample
-    fragColor = texture(iChannel1, uv);
+    fragColor = compScreen;
 }
