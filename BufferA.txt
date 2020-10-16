@@ -5,7 +5,7 @@
 	Modified by: Andrew Barnett & Shakeem Brown
     Modification date: 10/15/2020
 	Modification Reason: Implemented the rotating cube map
-    Title: The Buffer A, cube map
+	Buffer A, Cubemap
 */
 
 //------------------------------------------------------------
@@ -36,7 +36,7 @@ vec3 getRayDirection(vec2 screenPosition, vec3 origin, vec3 lookingAt, vec3 up, 
 //	  vp:  input viewport info
 //	  ray: input ray info
 //    time: the time
-color4 calcColor(in sViewport vp, in sRay ray, in float time)
+color4 calcColor(in sViewport vp, in sRay ray, in float time, in samplerCube image)
 {
     float rotation_speed = 0.5; // the rotation speed
     vec3 center = vec3(0.0, 1.0, 0.0); // the center of the screen
@@ -53,7 +53,7 @@ color4 calcColor(in sViewport vp, in sRay ray, in float time)
     vec3 theRaydirection = getRayDirection(position, cameraPosition, cameraLookingAt, cameraUp, 90.0);
     
     // Returns the new raydirection and the 3d map image
-    return texture(iChannel0, theRaydirection);
+    return texture(image, theRaydirection);
 }
 
 
@@ -78,5 +78,5 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     // render
     initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
     initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
-    fragColor += calcColor(vp, ray, iTime);
+    fragColor += calcColor(vp, ray, iTime, iChannel0);
 }

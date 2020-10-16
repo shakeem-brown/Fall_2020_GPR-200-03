@@ -1,8 +1,5 @@
-void mainCubemap( out vec4 fragColor, in vec2 fragCoord, in vec3 rayOri, in vec3 rayDir )
+vec2 mainSound( float time )
 {
-    // Ray direction as color
-    vec3 col = 0.5 + 0.5*rayDir;
-
-    // Output to cubemap
-    fragColor = vec4(col,1.0);
+    // A 440 Hz wave that attenuates quickly overt time
+    return vec2( sin(6.2831*440.0*time)*exp(-3.0*time) );
 }

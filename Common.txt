@@ -94,6 +94,23 @@ vec3 vec3Normal(in vec3 a)
     return unit_vector; // returns the unit vector
 }
 
+// vec2dotProdcuct: calculates the dot product of a vector two
+//		a: the vector being dot product
+float vec2dotProduct(in vec2 a)
+{
+    float dotProduct = (a.x * a.x) + (a.y * a.y); // dotproduct formula
+    return dotProduct; // returns the dotproduct
+}
+
+// vec2dotProdcuct2: calculates the dot product of a vector two
+//		a: the vector being dot product
+//		b: the other vector being dot product
+float vec2dotProduct2(in vec2 a, in vec2 b)
+{
+    float dotProduct = (a.x * b.x) + (a.y * b.y); // dotproduct formula
+    return dotProduct; // returns the dotproduct
+}
+
 //------------------------------------------------------------
 // VIEWPORT INFO
 

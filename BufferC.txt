@@ -3,34 +3,59 @@
 	Buffer C, Gaussian Blur
 */
 
-const int samples = 35;
-const int LOD = 2;         // gaussian done on MIPmap at scale LOD
-const int sLOD = 1 << LOD; // tile size = 2^LOD
-const float sigma = float(samples) * 0.03663;
+/*
+	Inspired by: @   FabriceNeyret2
+						https://www.shadertoy.com/view/ltScRG
 
-float gaussian(in vec2 i) 
+*/
+
+// Helper constants
+const int SAMPLE = 35; // test sample
+const int LOD = 2;         // gaussian done on MIPmap at scale LOD
+const int S_LOD = 1 << LOD; // tile size = 2^LOD
+const float SIGMA = float(SAMPLE) * 0.03663; // 1/27.3
+const float TWO_PI = 6.28; // 2 * pi
+
+// gaussian: The blur being applied to the image
+//		xy_coordinates:  the coordinate position that is being applied the blur effect
+float gaussian(in vec2 coordinates) 
 {
-    return exp( -.5* dot(i/=sigma,i) ) / ( 6.28 * sigma*sigma );
+    // gaussian blurr formula
+    return exp(-0.5 * vec2dotProduct((coordinates /= SIGMA, coordinates)) ) / ( TWO_PI * SIGMA * SIGMA);
 }
 
-vec4 blur(sampler2D image, in vec2 fragCoord, vec2 scale) 
+// blur: the gussain effect being applied to the image/ screen
+//		image: the image/ texture on the screen
+//      fragCoord: input location of current pixel in image (in pixels)
+//		scale: the scaler vector
+vec4 blur(sampler2D image, in sCoord fragCoord, vec2 scale) 
 {
-    vec4 blurEffect = vec4(0);  
-    int s = samples/sLOD;
+    vec4 blurEffect = vec4(0.0); // intalizing the blureffect and seting it to a defult value
+    int the_sample = SAMPLE/S_LOD; // the sample ratio
     
-    for ( int i = 0; i < s*s; i++ )
+    for ( int i = 0; i < the_sample * the_sample; i++ ) // the loop that applies the blur
     {
-        vec2 d = vec2(i%s, i/s)*float(sLOD) - float(samples)/2.;
-        blurEffect += gaussian(d) * textureLod( image, fragCoord + scale * d , float(LOD) );
+        // the coordinates being applied the sample ratio
+        vec2 xy_coordinates = vec2(i % the_sample, i / the_sample) * float(S_LOD) - float(SAMPLE) * 0.5;
+        
+        // applying the gaussian formula to the blurr
+        blurEffect += gaussian(xy_coordinates) * textureLod(image, fragCoord + scale * xy_coordinates , float(LOD));
     }
     
-    return blurEffect / blurEffect.a;
+    return blurEffect / blurEffect.a; // returns the blur effect
 }
 
 // mainImage: process the current pixel (exactly one call per pixel)
 //    fragColor: output final color for current pixel
 //    fragCoord: input location of current pixel in image (in pixels)
-void mainImage(out vec4 fragColor, in vec2 fragCoord)
+void mainImage(out vec4 fragColor, in sCoord fragCoord)
 {
-    fragColor = blur( iChannel0, fragCoord/iResolution.xy, 1./iChannelResolution[0].xy );
+     // The pixel size in textured space
+    sDCoord pixelSizeInTextureSpace = 1.0 / iChannelResolution[0].xy;
+    
+    // the pixel coordinate normal to the screen
+    sCoord uv = fragCoord * pixelSizeInTextureSpace;
+    
+    // returned to image
+    fragColor = blur(iChannel0, fragCoord * pixelSizeInTextureSpace, pixelSizeInTextureSpace);
 }

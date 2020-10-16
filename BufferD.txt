@@ -1,35 +1,64 @@
-//CONTROL VARIABLES
-float uPower = 0.2; // barrel power - (values between 0-1 work well)
-float uSpeed = 5.0;
-float uFrequency = 5.0;
+/*
+	Authers: Andrew Barnett & Shakeem Brown
+	Buffer D, Distortion Mousic Click Effect
+*/
 
-vec2 Distort(vec2 p, float power, float speed, float freq)
+/*
+	Inspired by: @ marcofugaro
+				https://www.shadertoy.com/view/XlGBW1
+*/
+
+// Helper constants
+const float U_POWER = 0.2; // barrel power - (values between 0-1 work well)
+const float U_SPEED = 25.0; // the speed of distortion
+const float U_FREQUENCY = 25.0; // the frequency of the distortion
+
+// DistortionEffect: creates the distortion effect to the screen
+//		pixel_coord: the uv, the pixel coordinates
+//		power: the power/ exponent
+//		speed: the speed of the distortion
+//		frequency: the frequency of the distortion effect
+//		time: the time
+vec3 DistortionEffect(in vec2 pixel_coord, in float power, in float speed, in float frequency, in float time)
 {
-    float theta  = atan(p.y, p.x);
-    float radius = length(p);
-    radius = pow(radius, power*sin(radius*freq-iTime*speed)+1.0);
-    p.x = radius * cos(theta);
-    p.y = radius * sin(theta);
-    return 0.5 * (p + 1.0);
+    float theta  = atan(pixel_coord.y, pixel_coord.x); // the radians depending on the pixel coordinates
+    float radius = length(pixel_coord); // the radius of the distortion effect
+    
+    // the exponetiel formula for the distortion effect
+    radius = pow(radius, power * sin(radius * frequency - time * speed)+ 1.0); 
+    pixel_coord.x = radius * cos(theta); // the x pixel coordinate 
+    pixel_coord.y = radius * sin(theta); // the y pixel coordinate 
+    return vec3(0.5 * (pixel_coord + 1.0), 1.0); // the x and y pixel coordinate distorted
 }
 
+// mainImage: process the current pixel (exactly one call per pixel)
+//    fragColor: output final color for current pixel
+//    fragCoord: input location of current pixel in image (in pixels)
 void mainImage(out vec4 fragColor, in sCoord fragCoord )
 {
+  // The pixel size in textured space
+  sDCoord pixelSizeInTextureSpace = 1.0 / iChannelResolution[0].xy;
+
+  // the pixel coordinate normal to the screen
+  sCoord uv = fragCoord * pixelSizeInTextureSpace;
    
-  vec2 mouse =  iMouse.xy/iResolution.xy;
-  vec2 uv = fragCoord.xy/iResolution.xy;
-  bool clicked = iMouse.z > 0.0;
+  // the mouse being normal to the screen
+  vec2 mouse =  iMouse.xy * pixelSizeInTextureSpace;
+  bool clicked = iMouse.z > 0.0; // checking if the mouse is clicked or not
     
-  vec2 distortCenter = 2.0 * (uv - mouse);
-  vec2 textCoords = uv;
+  vec2 distortCenter = 2.5 * (uv - mouse); // the center of the distortion
+  vec3 textCoords = vec3(uv, 1.0); // the texture coordinates
     
-    
-  float d = length(distortCenter);
-  if (d < 1.0 && clicked){
-    textCoords = Distort(distortCenter, uPower, uSpeed, uFrequency);
+  float the_distance = length(distortCenter); // the length of the distortion center
+  
+  // Changes the center of the distortion depending if the mouse was clicked
+  if (the_distance < 1.0 && clicked)
+  {
+      // draws the distortion effect
+    textCoords = DistortionEffect(distortCenter, U_POWER, U_SPEED, U_FREQUENCY, iTime);
   }
 
-    
-  vec4 c = texture(iChannel1, textCoords );
-  fragColor = c;
+  // The output of the effect with the texture coordinates
+  vec4 the_output = vec4(texture(iChannel1, textCoords.xy));
+  fragColor = the_output; // the output
 }
