@@ -1,6 +1,12 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
 //  -> COMMON TAB (shared with all other tabs)
 
+/*
+	Modifed by: Shakeem Brown @ Andrew Barnett
+	Modification Reason: Added he dot product, normalization function,
+						and cross product for optimization
+*/
+
 //------------------------------------------------------------
 // TYPE ALIASES & UTILITY FUNCTIONS
 
