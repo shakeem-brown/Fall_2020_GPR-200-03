@@ -185,11 +185,14 @@ struct wWorm
 };
 
 
-void initWorm(out wWorm worm, in vec3 center, in float radius)
+void initWorm(out wWorm worm, in vec4 center, in float radius)
 {
-    worm.center = asPoint(center);
+    worm.center = center;
     worm.radius = radius;
 }
+
+
+
 
 
 
