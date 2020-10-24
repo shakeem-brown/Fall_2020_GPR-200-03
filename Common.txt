@@ -1,12 +1,6 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
 //  -> COMMON TAB (shared with all other tabs)
 
-/*
-	Modifed by: Shakeem Brown @ Andrew Barnett
-	Modification Reason: Added he dot product, normalization function,
-						and cross product for optimization
-*/
-
 //------------------------------------------------------------
 // TYPE ALIASES & UTILITY FUNCTIONS
 
@@ -75,47 +69,6 @@ sScalar lengthSq(sVector x)
     return dot(x, x);
 }
 
-// vec3Cross: calculate the cross product of a vector 3 type
-//		a: the first vector3
-//		b: the second vector3
-vec3 vec3Cross(in vec3 a, in vec3 b)
-{
-    float i = (a.y * b.z) - (a.z * b.y); // the first slot
-    float j = (a.z * b.x) - (a.x * b.z); // the second slot
-    float k = (a.x * b.y) - (a.y * b.x); // the third slot
-    
-    vec3 crossProduct = vec3(i, j, k); // the cross product
-    
-    return crossProduct; // returns the cross product
-}
-
-// vec3Normal: calculates the unit vector of a vector 3
-//		a: the vector being normalzied
-vec3 vec3Normal(in vec3 a)
-{
-    // the calulations of the vecotr's length/ magnitude
-    float magnitude = ((a.x * a.x) + (a.y * a.y) + (a.z * a.z)) * 0.5;
-    vec3 unit_vector = a / magnitude; // the unit vector calculation
-    
-    return unit_vector; // returns the unit vector
-}
-
-// vec2dotProdcuct: calculates the dot product of a vector two
-//		a: the vector being dot product
-float vec2dotProduct(in vec2 a)
-{
-    float dotProduct = (a.x * a.x) + (a.y * a.y); // dotproduct formula
-    return dotProduct; // returns the dotproduct
-}
-
-// vec2dotProdcuct2: calculates the dot product of a vector two
-//		a: the vector being dot product
-//		b: the other vector being dot product
-float vec2dotProduct2(in vec2 a, in vec2 b)
-{
-    float dotProduct = (a.x * b.x) + (a.y * b.y); // dotproduct formula
-    return dotProduct; // returns the dotproduct
-}
 
 //------------------------------------------------------------
 // VIEWPORT INFO
@@ -221,33 +174,44 @@ void initRayOrtho(out sRay ray,
 
 
 //------------------------------------------------------------
-/*
-// GLSL FRAGMENT SHADER STRUCTURE WITH COMMON TAB
-//  -> This is (likely) how Shadertoy compiles buffer tabs:
+// WORM INFO
 
-// latest version or whichever is used
-#version 300 es
 
-// **CONTENTS OF COMMON TAB PASTED HERE**
 
-// PROGRAM UNIFORMS (see 'Shader Inputs' dropdown)
-
-// **CONTENTS OF BUFFER TAB PASTED HERE**
-
-// FRAGMENT SHADER INPUTS (more on this later)
-
-// FRAGMENT SHADER OUTPUTS (framebuffer render target(s))
-//out vec4 rtFragColor; // no specific target
-layout (location = 0) out vec4 rtFragColor; // default
-
-void main()
+struct wWorm
 {
-    // Call 'mainImage' in actual shader main, which is 
-	// 	our prototyping interface for ease of use.
-	//		rtFragColor:  shader output passed by reference,
-	//			full vec4 read in 'mainImage' as 'fragColor'
-	//		gl_FragCoord: GLSL's built-in pixel coordinate,
-	//			vec2 part read in 'mainImage' as 'fragCoord'
-    mainImage(rtFragColor, gl_FragCoord.xy);
+    vec4 center;
+    float radius;
+};
+
+
+void initWorm(out wWorm worm, in vec3 center, in float radius)
+{
+    worm.center = asPoint(center);
+    worm.radius = radius;
 }
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

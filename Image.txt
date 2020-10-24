@@ -1,37 +1,123 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
 //  -> IMAGE TAB (final)
-
 /*
-	Authers: Andrew Barnett & Shakeem Brown
-	Title: Lab 6 - Intro to Post-Processing & Composition
+	Authors: Andrew Barnett & Shakeem Brown
 */
 
-//------------------------------------------------------------
-// SHADERTOY MAIN
+
+vec3 drawSphere(in wWorm worm, in vec3 center, in float radius)
+{
+    //TEST
+    vec3 dp; // the instance of the vec3 dotproduct called "dp"
+    dp.xy = ray.direction.xy - worm.center.xy; // intialazing the dotproduct with the xy of the ray
+    											// direction and the sphere center
+    float lSq = dot(dp.xy); // the length squared of the dot product
+    float rSq = worm.radius * worm.radius; // the radius squared
+    
+        // INSIDE OF THE SPHERE
+    if (lSq <= rSq)
+    {
+        dp.z = rSq - lSq; // setting the dotproduct of z to the radius square minus the length square
+        vec3 position = worm.center.xyz + vec3(dp.x, dp.y, sqrt(dp.z)); // the position of the sphere
+        vec3 normal = vec3 (position - worm.center.xyz) / worm.radius; // normalizing the sphere
+        
+        
+        vec3 sphere_color = vec3(1.0, 0.0, 0.0);
+        
+        return sphere_color;
+    }
+    
+    
+}
+
+vec4 getInput(in vec4 mouse, in sViewport screen)
+{
+    vec2 mouse_input =  mouse.xy * pixelSizeInTextureSpace;
+   
+	bool clicked = mouse.z > 0.0; // checking if the mouse is clicked or not
+    
+    if (clicked)
+    {
+        return ;
+    }
+    else // not clicked (stationary)
+    {
+        return ;
+    }
+}
+
+vec3 drawWorm(in wWorm worm, in vec4 mouse, in sViewport screen)
+{
+    sViewport screen;
+    wWorm worm; 
+    worm.radius = 0.2; 
+    worm.center = vec3(0.0, 0.0, -4.0);
+    initWorm(worm, worm.center, worm.radius);
+
+    
+    
+    vec3 wormHead = drawSphere(worm, worm.center, worm.radius);
+    vec2 mouse_input = getInput(mouse, screen).xy;
+    vec2 direction = mouse;
+    
+    float xDiff = mouse_input.x - wormHead.x;
+    float yDiff = mouse_input.y - wormHead.y;
+       
+    // Defining movement of the worm
+    if (abs(xDiff) > abs(yDiff)) // x case
+    {
+        if (xDiff > 0.0)
+        {
+            direction = vec2(2.0 * worm.radius, 0.0);
+        }
+        else
+        {
+            direction = vec2(-2.0 * worm.radius, 0.0);
+        }
+    }
+    else // y calse
+    {
+        if (yDiff > 0.0)
+        {
+            direction = vec2(0.0, 2.0 * worm.radius);
+        }
+        else
+        {
+            direction = vec2(0.0, -2.0 * worm.radius);
+        }
+    } 
+}
+
+
+vec4 createScene(in sRay ray, in vec4 mouse, in sViewport screen)
+{
+    sRay ray;
+    wWorm worm;
+    
+    drawWorm(worm, mouse, screen);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 // mainImage: process the current pixel (exactly one call per pixel)
 //    fragColor: output final color for current pixel
 //    fragCoord: input location of current pixel in image (in pixels)
 void mainImage(out color4 fragColor, in sCoord fragCoord)
 {
-    // texture space [0, 1)
-    // example: texture is 100 by 100 px, resInv = 0.01, 0.01
-    // 1/100 of the whole texture !!!
-    sDCoord pixelSizeInTextureSpace = 1.0 / iChannelResolution[0].xy;
+    // ray
+    sRay ray;
     
-    // setup
-    // test UV for input image
-    sCoord uv = fragCoord * pixelSizeInTextureSpace;
-    
-    vec4 origImage = texture(iChannel0, uv); // the original image
-    vec4 effect = texture(iChannel2, uv); // the effect image
-    
-    vec4 compAdd = origImage + effect; //  the adding blend
-    vec4 compMix = vec4 (mix(origImage, effect, 1.0)); // the mix blend
-    vec4 compScreen = 1.0 - (1.0 - origImage) * (1.0 - effect); // Screen blend formula
-    vec4 compMult = origImage * effect; // Multiply blen formula
-    
-    // TESTING
+        // TESTING
     // set iChannel0 to 'Misc/Buffer A' and fetch sample
-    fragColor = compMix;
+    fragColor = createScene(ray, iMouse);
 }
