@@ -5,11 +5,11 @@
 */
 
 
-vec3 drawSphere(in wWorm worm, in vec4 center, in float radius, in sRay ray)
+vec3 drawSphere(in wWorm worm, in vec4 center1, in float radius, in sRay ray)
 {
     //TEST
     vec3 dp; // the instance of the vec3 dotproduct called "dp"
-    dp.xy = ray.direction.xy - worm.center.xy; // intialazing the dotproduct with the xy of the ray
+    dp.xy = ray.direction.xy - worm.center1.xy; // intialazing the dotproduct with the xy of the ray
     											// direction and the sphere center
     float lSq = dot(dp.xy, dp.xy); // the length squared of the dot product
     float rSq = worm.radius * worm.radius; // the radius squared
@@ -18,8 +18,8 @@ vec3 drawSphere(in wWorm worm, in vec4 center, in float radius, in sRay ray)
     if (lSq <= rSq)
     {
         dp.z = rSq - lSq; // setting the dotproduct of z to the radius square minus the length square
-        vec3 position = worm.center.xyz + vec3(dp.x, dp.y, sqrt(dp.z)); // the position of the sphere
-        vec3 normal = vec3 (position - worm.center.xyz) / worm.radius; // normalizing the sphere
+        vec3 position = worm.center1.xyz + vec3(dp.x, dp.y, sqrt(dp.z)); // the position of the sphere
+        vec3 normal = vec3 (position - worm.center1.xyz) / worm.radius; // normalizing the sphere
         
         
         vec3 sphere_color = vec3(1.0, 0.0, 0.0);
@@ -47,13 +47,31 @@ vec4 getInput(in vec4 mouse, in sViewport screen, in sCoord fragCoord)
     }
 }
 
-vec3 drawWorm(in wWorm worm, in vec4 center, in float radius, in sRay ray,
+vec3 wormBuilder(in vec3 head, in vec3 segement1,in vec3 segement2,in vec3 segement3)
+{
+    vec3 buildWorm = head + segement1 + segement2 + segement3;
+    
+    return buildWorm;
+}
+
+vec3 drawWorm(in wWorm worm, in vec4 center1,
+              in vec4 center2, in vec4 center3, in vec4 center,
+              in float radius, in sRay ray,
               in vec4 mouse, in sViewport screen, in sCoord fragCoord)
 {
-    initWorm(worm, worm.center, worm.radius);
-
-    vec3 wormHead = drawSphere(worm, worm.center, worm.radius, ray);
+    initWorm(worm, worm.center1, worm.center2, worm.center3, worm.center4, worm.radius);
     
+    vec3 wormHead = drawSphere(worm, worm.center1, worm.radius, ray);
+    float diameter = 2.0 * worm.radius;
+    worm.center2 = vec4(diameter + worm.center1);
+    
+    vec3 segement1 = drawSphere(worm, worm.center2, worm.radius, ray);
+    worm.center3 = vec4(diameter + worm.center2);
+    
+    vec3 segement2 = drawSphere(worm, worm.center3, worm.radius, ray);
+    worm.center4 = vec4(diameter + worm.center3);
+    
+    vec3 segement3 = drawSphere(worm, worm.center4, worm.radius, ray);
     
     vec2 mouse_input = getInput(mouse, screen, fragCoord).xy, direction;
     float xDiff = mouse_input.x - wormHead.x;
@@ -83,15 +101,34 @@ vec3 drawWorm(in wWorm worm, in vec4 center, in float radius, in sRay ray,
         }
     } 
     
-    return vec3(direction, 1.0);
+    vec3 finalDirection = vec3(direction, 0.0);
+    vec3 theWorm = wormBuilder(wormHead, segement1,segement2,segement3) + finalDirection;
+    
+    return theWorm;
 }
 
 
-vec4 createScene(in wWorm worm, in vec4 center, in float radius, in sRay ray,
+vec4 createScene(in wWorm worm, in vec4 center1, in vec4 center2,
+                 in vec4 center3, in vec4 center4,in float radius, in sRay ray,
               in vec4 mouse, in sViewport screen, in sCoord fragCoord)
 {
-
-    return vec4(drawWorm(worm, center, radius, ray, mouse, screen, fragCoord), 1.0);
+    //THE WALLS
+    
+    vec3 dp;
+    dp.xy = ray.direction.xy - worm.center1.xy;
+    float lSq = dot(dp.xy, dp.xy);
+    float rSq = worm.radius * worm.radius;
+    
+    // THE WORM
+	if (lSq <= rSq)
+    {
+        return vec4(drawWorm(worm, center1, center2, center3, center4,
+                             radius, ray, mouse, screen, fragCoord), 1.0);
+    }
+    
+    //THE FLOOR
+    vec4 blue = vec4(0.0, 0.0, 1.0, 1.0);
+    return blue;
 }
 
 
@@ -117,7 +154,10 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     // worm
     wWorm worm;
     worm.radius = 0.2; 
-    worm.center = vec4(0.0, 0.0, -4.0, 1.0);
+    worm.center1 = vec4(0.0, 0.0, -4.0, 1.0);
+    worm.center2 = vec4(0.0, 0.0, -4.0, 1.0);
+    worm.center3 = vec4(0.0, 0.0, -4.0, 1.0);
+    worm.center4 = vec4(0.0, 0.0, -4.0, 1.0);
     
     // viewport info
     sViewport vp;
@@ -128,6 +168,6 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     
         // TESTING
     // set iChannel0 to 'Misc/Buffer A' and fetch sample
-    fragColor = createScene(worm, worm.center, worm.radius, ray,
+    fragColor = createScene(worm, worm.center1, worm.center2, worm.center3, worm.center4, worm.radius, ray,
               iMouse, vp, fragCoord);
 }

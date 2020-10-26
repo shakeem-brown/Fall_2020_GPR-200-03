@@ -180,14 +180,21 @@ void initRayOrtho(out sRay ray,
 
 struct wWorm
 {
-    vec4 center;
+    vec4 center1;
+    vec4 center2;
+    vec4 center3;
+    vec4 center4;
     float radius;
 };
 
 
-void initWorm(out wWorm worm, in vec4 center, in float radius)
+void initWorm(out wWorm worm, in vec4 center1, in vec4 center2,
+              in vec4 center3, in vec4 center4,in float radius)
 {
-    worm.center = center;
+    worm.center1 = center1;
+    worm.center2 = center2;
+    worm.center3 = center3;
+    worm.center4 = center4;
     worm.radius = radius;
 }
 
