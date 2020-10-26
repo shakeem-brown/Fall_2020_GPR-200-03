@@ -55,22 +55,16 @@ vec3 wormBuilder(in vec3 head, in vec3 segement1,in vec3 segement2,in vec3 segem
 }
 
 vec3 drawWorm(in wWorm worm, in vec4 center1,
-              in vec4 center2, in vec4 center3, in vec4 center,
+              in vec4 center2, in vec4 center3, in vec4 center4,
               in float radius, in sRay ray,
               in vec4 mouse, in sViewport screen, in sCoord fragCoord)
 {
+    float diameter = worm.radius * 2.0;
     initWorm(worm, worm.center1, worm.center2, worm.center3, worm.center4, worm.radius);
     
     vec3 wormHead = drawSphere(worm, worm.center1, worm.radius, ray);
-    float diameter = 2.0 * worm.radius;
-    worm.center2 = vec4(diameter + worm.center1);
-    
     vec3 segement1 = drawSphere(worm, worm.center2, worm.radius, ray);
-    worm.center3 = vec4(diameter + worm.center2);
-    
     vec3 segement2 = drawSphere(worm, worm.center3, worm.radius, ray);
-    worm.center4 = vec4(diameter + worm.center3);
-    
     vec3 segement3 = drawSphere(worm, worm.center4, worm.radius, ray);
     
     vec2 mouse_input = getInput(mouse, screen, fragCoord).xy, direction;
@@ -82,26 +76,26 @@ vec3 drawWorm(in wWorm worm, in vec4 center1,
     {
         if (xDiff > 0.0)
         {
-            direction = vec2(2.0 * worm.radius, 0.0);
+            direction = vec2(diameter, 0.0);
         }
         else
         {
-            direction = vec2(-2.0 * worm.radius, 0.0);
+            direction = vec2(-diameter, 0.0);
         }
     }
-    else // y calse
+    else // y case
     {
         if (yDiff > 0.0)
         {
-            direction = vec2(0.0, 2.0 * worm.radius); // (the (*) radius) causes the screen to change color
+            direction = vec2(0.0, diameter);
         }
         else
         {
-            direction = vec2(0.0, -2.0 * worm.radius);
+            direction = vec2(0.0, -diameter);
         }
     } 
     
-    vec3 finalDirection = vec3(direction, 0.0);
+    vec3 finalDirection = asBasis(direction);
     vec3 theWorm = wormBuilder(wormHead, segement1,segement2,segement3) + finalDirection;
     
     return theWorm;
@@ -115,12 +109,42 @@ vec4 createScene(in wWorm worm, in vec4 center1, in vec4 center2,
     //THE WALLS
     
     vec3 dp;
-    dp.xy = ray.direction.xy - worm.center1.xy;
+    dp.xy = ray.direction.xy - worm.center1.xy; 
     float lSq = dot(dp.xy, dp.xy);
     float rSq = worm.radius * worm.radius;
     
-    // THE WORM
+    // THE WORMHEAD
 	if (lSq <= rSq)
+    {
+        return vec4(drawWorm(worm, center1, center2, center3, center4,
+                             radius, ray, mouse, screen, fragCoord), 1.0);
+    }
+    
+    dp.xy = ray.direction.xy - worm.center2.xy; 
+    lSq = dot(dp.xy, dp.xy);
+    rSq = worm.radius * worm.radius;
+    
+    if (lSq <= rSq)
+    {
+        return vec4(drawWorm(worm, center1, center2, center3, center4,
+                             radius, ray, mouse, screen, fragCoord), 1.0);
+    }
+    
+    dp.xy = ray.direction.xy - worm.center3.xy; 
+    lSq = dot(dp.xy, dp.xy);
+    rSq = worm.radius * worm.radius;
+    
+    if (lSq <= rSq)
+    {
+        return vec4(drawWorm(worm, center1, center2, center3, center4,
+                             radius, ray, mouse, screen, fragCoord), 1.0);
+    }
+    
+    dp.xy = ray.direction.xy - worm.center4.xy; 
+    lSq = dot(dp.xy, dp.xy);
+    rSq = worm.radius * worm.radius;
+   
+    if (lSq <= rSq)
     {
         return vec4(drawWorm(worm, center1, center2, center3, center4,
                              radius, ray, mouse, screen, fragCoord), 1.0);
@@ -134,22 +158,27 @@ vec4 createScene(in wWorm worm, in vec4 center1, in vec4 center2,
 
 
 
-
-
-
-
-
-
-
-
-
 // mainImage: process the current pixel (exactly one call per pixel)
 //    fragColor: output final color for current pixel
 //    fragCoord: input location of current pixel in image (in pixels)
 void mainImage(out color4 fragColor, in sCoord fragCoord)
 {
+    // viewing plane (viewport) inputs
+    const sBasis eyePosition = sBasis(0.0);
+    const sScalar viewportHeight = 2.0, focalLength = 1.5;
+    
     // ray
     sRay ray;
+    
+    // viewport info
+    sViewport vp;
+    
+    vec2 pixelSizeInTextureSpace = 1.0 / iChannelResolution[0].xy;
+    vec2 uv = fragCoord * pixelSizeInTextureSpace;
+    
+      // render
+    initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
+    initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
     
     // worm
     wWorm worm;
@@ -158,13 +187,6 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     worm.center2 = vec4(0.0, 0.0, -4.0, 1.0);
     worm.center3 = vec4(0.0, 0.0, -4.0, 1.0);
     worm.center4 = vec4(0.0, 0.0, -4.0, 1.0);
-    
-    // viewport info
-    sViewport vp;
-    
-    vec2 pixelSizeInTextureSpace = 1.0 / iChannelResolution[0].xy;
-
-    vec2 uv = fragCoord * pixelSizeInTextureSpace;
     
         // TESTING
     // set iChannel0 to 'Misc/Buffer A' and fetch sample
