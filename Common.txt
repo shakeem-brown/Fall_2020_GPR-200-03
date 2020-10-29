@@ -187,21 +187,14 @@ void initRayOrtho(out sRay ray,
 struct wWorm
 {
     vec4 center1;
-    vec4 center2;
-    vec4 center3;
-    vec4 center4;
     float radius;
 };
 
-void initWorm(out wWorm worm, in vec4 center1, in vec4 center2,
-              in vec4 center3, in vec4 center4,in float radius)
+void initWorm(out wWorm worm, in vec4 center1,in float radius)
 {
     worm.radius = radius;
     float diameter = radius * 2.0;
     worm.center1 = center1;
-    worm.center2 = center1 + diameter;
-    worm.center3 = center2 + (diameter * 2.0);
-    worm.center4 = center3 + (diameter * 3.0);
     
 }
 
@@ -213,3 +206,39 @@ struct Light
     vec3 direction;
     float occlusion; 
 };
+    
+    #define T(i,j)         texelFetch(iChannel0,ivec2(i,j),0)
+    #define rot(a) mat2(cos( a + vec4(0,33,11,0)))   // From https://www.shadertoy.com/view/XlsyWX
+    #define D0  vec2(10,5)     // initial segment vector
+    #define A0  atan((D0).y,(D0).x) // corresponding angle and length
+    
+    
+vec3 vecP(in vec3 P, in vec3 a)
+{
+    P.xy*= rot(a.z);
+    P.yz *= rot(a.x),
+    P.xz *= rot(a.y);
+    return P;
+}
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

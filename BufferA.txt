@@ -1,82 +1,189 @@
-// GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
-//  -> BUFFER A TAB (scene)
-
-/*
-	Modified by: Andrew Barnett & Shakeem Brown
-    Modification date: 10/15/2020
-	Modification Reason: Implemented the rotating cube map
-	Buffer A, Cubemap
-*/
-
-//------------------------------------------------------------
-// RENDERING FUNCTIONS
-
-/*
-	Inspired by: @ Takoa
-					https://www.shadertoy.com/view/MdXfDS
-*/
-// getRayDirection: gets the ray direction and does the normalization of the screen and ray
-//		origin: The origin of the camera's position
-//      screenPosition: the screen's position
-//		lookingAt: the location where the camera is pointing at
-//		up: the value that the camera is looking upwards/ fixed
-//		fov: the angle of rotation
-vec3 getRayDirection(vec2 screenPosition, vec3 origin, vec3 lookingAt, vec3 up, float fov)
+/*vec3 wrapAround(in vec3 originalPos, in vec3 nearPos, in vec3 r)
 {
-    vec3 d = vec3Normal(lookingAt - origin); // the distance
-    vec3 rayRight = vec3Normal(vec3Cross(d, up)); // the right of the the ray
+    vec3 pos = mod(originalPos, r);
+    float midX = r.x / 2.0;
+    float midY = r.y / 2.0;
+    if (nearPos.x < midX && pos.x > midX) pos.x -= r.x;
+    if (nearPos.y < midY && pos.y > midY) pos.y -= r.y;
+    if (nearPos.x > midX && pos.x < midX) pos.x += r.x;
+    if (nearPos.y > midY && pos.y < midY) pos.y += r.y;
     
-    // the normalization of the screen position with the ray
-    vec3 normal = vec3(vec3Normal(screenPosition.x * rayRight + screenPosition.y * up + 1.0 / tan(radians(fov / 2.0)) * d));
-    
-    return normal; // returns the normal oof the screen with the ray
+    return pos; 
 }
 
-// calcColor: calculate the color of current pixel
-//	  vp:  input viewport info
-//	  ray: input ray info
-//    time: the time
-color4 calcColor(in sViewport vp, in sRay ray, in float time, in samplerCube image)
+vec4 theHead(in sViewport vp, in wWorm worm, in int frame, out vec4 color)
 {
-    float rotation_speed = 0.5; // the rotation speed
-    vec3 center = vec3(0.0, 1.0, 0.0); // the center of the screen
+    vp.pixelCoord -=0.5;
+    float i = vp.pixelCoord.x, j = vp.pixelCoord.y;
+    vec3 r = vec3(400.0 * vp.resolution.xy * vp.resolutionInv.y, 1.0);
     
-    // the position of the normal of the screen
-    vec2 position = (2.0 * vp.pixelCoord - vp.resolution.xy) / vp.resolution.y;
-    vec3 cameraPosition = vec3(0.0, 0.0, 0.0); // the camera's position
-    vec3 cameraUp = center; // the camera's up in reltion to the center of the screen
-    
-    // The calculation of the screen panneling to the right
-    vec3 cameraLookingAt = vec3(cos(rotation_speed * time), 0.0, sin(rotation_speed * time));
-    
-    // setting the new ray durection to be returned
-    vec3 theRaydirection = getRayDirection(position, cameraPosition, cameraLookingAt, cameraUp, 90.0);
-    
-    // Returns the new raydirection and the 3d map image
-    return texture(image, theRaydirection);
+    if (frame == 0)
+    {
+        if (j == 0.0)
+        {
+            if (i == 0.0)
+            {
+                color.z = A0;
+            }
+            float wLength = 4.0;
+            i = (wLength - i) - 1.0;
+            //color.xy = mod();
+        }
+    }
+    return vec4(1.0);
+}
+*/
+
+// color of the worm
+vec4 drawSphere(in wWorm worm, in vec4 center1, in float radius, in sRay ray)
+{
+   vec4 sphere_color = vec4(0.0, 0.0, 1.0, 1.0); // blue
+    return sphere_color;
+
 }
 
 
-//------------------------------------------------------------
-// SHADERTOY MAIN
-
-// mainImage: process the current pixel (exactly one call per pixel)
-//    fragColor: output final color for current pixel
-//    fragCoord: input location of current pixel in image (in pixels)
-void mainImage(out color4 fragColor, in sCoord fragCoord)
+//have a seprate check (has an x and y of the mouse)
+// if the mousex and y is not the same as the center update
+// stop moving when they are equal
+//if mous.xy is not == to center .xy
+// then move the center closer to where the mouse is
+// by doing that it will get to the mouse
+vec4 checkAndUpdate(in sViewport vp, in vec4 center1, in vec4 mouse)
 {
+    const float INCREMENTOR = 0.9;
+    vec2 diff = vp.uv - center1.xy;
+    
+    // x check
+    if (mouse.x != diff.x)
+    {
+        center1 = vec4(center1.x + INCREMENTOR, center1.yzw);
+    }
+
+
+    // y check
+    if (mouse.y != diff.y)
+    {
+        center1 = vec4(center1.y + INCREMENTOR, center1.xzw);
+    }
+    
+    return center1;
+}
+
+
+vec4 headMovement(in wWorm worm, in sRay ray, in vec4 mouse, in sViewport vp)
+{
+    vec4 head = worm.center1;
+    
+    //head = drawSphere(worm, worm.center1, worm.radius, ray);
+    head = checkAndUpdate(vp, worm.center1, mouse);
+     return head;
+}
+
+vec2 getDirection(in vec4 center1, in sViewport vp, in vec4 mouse, in wWorm worm)
+{
+    float diameter = worm.radius * 2.0;
+    
+    vec2 mouse_input =  mouse.xy * vp.resolutionInv;
+    vec4 mouse_center = vec4(vp.uv.x - mouse.x, vp.uv.y - mouse.y, mouse.z, 1.0);
+    float xDiff = mouse_input.x - center1.x;
+    float yDiff = mouse_input.y - center1.y;
+    
+    vec2 direction;
+    
+    // Defining movement of the worm
+    if (abs(xDiff) > abs(yDiff)) // x case
+    {
+        if (xDiff > 0.0)
+        {
+            direction = vec2(diameter, 0.0);
+        }
+        else
+        {
+            direction = vec2(-diameter, 0.0);
+        }
+    }
+    else // y case
+    {
+        if (yDiff > 0.0)
+        {
+            direction = vec2(0.0, diameter);
+        }
+        else
+        {
+            direction = vec2(0.0, -diameter);
+        }
+    }
+    
+    return center1.xy + direction;
+}
+
+
+// Supposes to make a trail for the worm for the body
+vec4 wormBuilder(in vec4 head, in wWorm worm, in sRay ray)
+{
+    vec3 rotation = vec3(0.2, 0.2, 0.2);
+    vec3 test = vecP(ray.direction.xyz, rotation);
+    
+    float wormLength = 4.0;
+    float dis;
+    
+    vec4 wormOutput = vec4(0.0);
+    for (float i = wormLength; i > 0.0; --i)
+    {
+        test = T(i,0.0).xyz;
+        dis = length(ray.direction.xyz - test);
+        wormOutput += vec4(mix(wormOutput, vec4(dis), smoothstep(.02, 0.0, dis - worm.radius)));
+    }
+    
+    return wormOutput;
+}
+
+vec4 getInput(in vec4 mouse, in sViewport vp, in wWorm worm, in vec4 center1,
+              in float radius, in sRay ray)
+{
+    vec4 head = center1;
+    vec2 mouse_input =  mouse.xy * vp.resolutionInv;
+    vec4 mouse_center = vec4(ray.direction.x - mouse.x, ray.direction.y - mouse.y, mouse.z, 1.0);
+    
+    
+    float diameter = worm.radius * 2.0;
+    initWorm(worm, worm.center1, worm.radius);
+    
+    head = drawSphere(worm, worm.center1, worm.radius, ray); // headMovement
+    
+    vec4 headDirection = vec4(getDirection(center1, vp, mouse, worm), mouse.z, 1.0);
+
+    
+    return vec4(wormBuilder(head, worm, ray) + headDirection);
+
+}
+
+
+void mainImage( out vec4 fragColor, in sCoord fragCoord )
+{
+    
     // viewing plane (viewport) inputs
     const sBasis eyePosition = sBasis(0.0);
     const sScalar viewportHeight = 2.0, focalLength = 1.5;
     
-    // viewport info
-    sViewport vp;
-
     // ray
     sRay ray;
     
-    // render
+    // viewport info
+    sViewport vp;
+    
+      // render
     initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
     initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
-    fragColor += calcColor(vp, ray, iTime, iChannel0);
+    
+    // worm
+    wWorm worm;
+    worm.radius = 0.2; 
+    worm.center1 = vec4(0.0, 0.0, -4.0, 1.0);
+    vec4 head = drawSphere(worm, worm.center1, worm.radius, ray);
+    vec4 center = checkAndUpdate(vp, worm.center1, iMouse);
+    
+    
+    fragColor = getInput(iMouse, vp, worm, center, worm.radius, ray);
 }

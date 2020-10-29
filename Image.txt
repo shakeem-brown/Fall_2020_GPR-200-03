@@ -4,137 +4,32 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-vec3 drawSphere(in wWorm worm, in vec4 center1, in float radius, in sRay ray)
-{
-    float i = 0.0; 
-    
-    vec3 dp; // the instance of the vec3 dotproduct called "dp"
-    dp.xy = ray.direction.xy - worm.center1.xy; // intialazing the dotproduct with the xy of the ray
-    											// direction and the sphere center
-    float lSq = dot(dp.xy, dp.xy); // the length squared of the dot product
-    float rSq = worm.radius * worm.radius; // the radius squared
 
-    // INSIDE OF THE SPHERE
-    if (lSq <= rSq)
-    {
-        dp.z = rSq - lSq; // setting the dotproduct of z to the radius square minus the length square
-        vec3 position = worm.center1.xyz + vec3(dp.x, dp.y, sqrt(dp.z)); // the position of the sphere
-        vec3 normal = vec3 (position - worm.center1.xyz) / worm.radius; // normalizing the sphere
-
-
-        vec3 sphere_color = vec3(0.1, 1.0, 0.0); // clicked color
-
-        return sphere_color;
-    }
-}
-
-vec3 wormBuilder(in vec3 head, in vec3 segement1,in vec3 segement2,in vec3 segement3)
-{
-    vec3 buildWorm = head + segement1 + segement2 + segement3;
-    
-    return buildWorm;
-}
-
-vec2 getDirection(in vec4 center1, in sViewport vp, in vec4 mouse, in wWorm worm)
-{
-    float diameter = worm.radius * 2.0;
-    vec3 textCoords = vec3(vp.uv, 1.0);
-    
-    vec2 mouse_input =  mouse.xy * vp.resolutionInv;
-    vec4 mouse_center = vec4(vp.uv.x - mouse.x, vp.uv.y - mouse.y, mouse.z, 1.0);
-    float xDiff = mouse_input.x - center1.x;
-    float yDiff = mouse_input.y - center1.y;
-    
-    vec2 direction;
-    
-    // Defining movement of the worm
-    if (abs(xDiff) > abs(yDiff)) // x case
-    {
-        if (xDiff > 0.0)
-        {
-            direction = vec2(diameter, 0.0);
-        }
-        else
-        {
-            direction = vec2(-diameter, 0.0);
-        }
-    }
-    else // y case
-    {
-        if (yDiff > 0.0)
-        {
-            direction = vec2(0.0, diameter);
-        }
-        else
-        {
-            direction = vec2(0.0, -diameter);
-        }
-    }
-    
-    return direction;
-}
-
-vec4 getInput(in vec4 mouse, in sViewport vp, in wWorm worm, in vec4 center1,
-              in float radius, in sRay ray,
-             in vec3 head, in vec3 segement1,in vec3 segement2,in vec3 segement3)
-{
-    vec3 textCoords = vec3(vp.uv, 1.0);
-    
-    vec2 mouse_input =  mouse.xy * vp.resolutionInv;
-    vec4 mouse_center = vec4(vp.uv.x - mouse.x, vp.uv.y - mouse.y, mouse.z, 1.0);
-    
-    vec3 shape = drawSphere(worm, mouse_center, radius, ray);
-    float shapeSize = dot(shape, shape);
-    
-    float diameter = worm.radius * 2.0;
-    initWorm(worm, worm.center1, worm.center2, worm.center3, worm.center4, worm.radius);
-    
-    head = drawSphere(worm, worm.center1, worm.radius, ray);
-    segement1 = drawSphere(worm, worm.center2, worm.radius, ray);
-    segement2 = drawSphere(worm, worm.center3, worm.radius, ray);
-    segement3 = drawSphere(worm, worm.center4, worm.radius, ray);
-    
-    
-    vec4 headDirection = vec4(getDirection(center1, vp, mouse, worm), mouse.z, 1.0);
-
-    
-    if (shapeSize > 1.0 && mouse.z > 0.0) // checking if the mouse is clicked or not
-    {
-        return vec4(wormBuilder(head, segement1,segement2,segement3), 1.0) + headDirection;
-    }
-    else // not clicked (stationary)
-    {
-        return vec4(1.0, 0.5, 0.0, 1.0); // not clicked color
-    }
-}
 
 vec3 blinn_phong(in sRay ray, in wWorm worm, in Light light, in float time)
 {
     return vec3(0.0);
 }
 
-vec4 createScene(in wWorm worm, in vec4 center1, in vec4 center2,
-                 in vec4 center3, in vec4 center4,in float radius, in sRay ray,
-              in vec4 mouse, in sViewport vp, in vec3 head, in vec3 segement1,
-                 in vec3 segement2,in vec3 segement3)
+vec4 createScene(in wWorm worm, in vec4 center1,in float radius, in sRay ray,
+              in vec4 mouse, in sViewport vp)
 {
     
-    //THE WALLS
+    // ********* THE WALLS *********
     
+    // ********* THE WORMHEAD *********
     vec3 dp;
+    
     dp.xy = ray.direction.xy - worm.center1.xy; 
     float lSq = dot(dp.xy, dp.xy);
     float rSq = worm.radius * worm.radius;
     
-    // THE WORMHEAD
-	if (lSq <= rSq)
+	if (lSq <= rSq && mouse.z > 0.0 )
     {
-        return getInput(mouse, vp,
-             worm, center1, radius, ray,
-             head, segement1, segement2, segement3);
+        return texture(iChannel1, ray.direction.xy);
     }
     
-    //THE FLOOR
+    // ********* THE FLOOR *********
     vec4 theFloor = texture(iChannel0, vp.uv);
     return theFloor;
 }
@@ -163,17 +58,10 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     wWorm worm;
     worm.radius = 0.2; 
     worm.center1 = vec4(0.0, 0.0, -4.0, 1.0);
-    worm.center2 = vec4(0.0, 1.0, -4.0, 1.0);
-    worm.center3 = vec4(0.0, 2.0, -4.0, 1.0);
-    worm.center4 = vec4(0.0, 3.0, -4.0, 1.0);
-    vec3 head = drawSphere(worm, worm.center1, worm.radius, ray);
-    vec3 segement1 = drawSphere(worm, worm.center2, worm.radius, ray);
-    vec3 segement2 = drawSphere(worm, worm.center3, worm.radius, ray);
-    vec3 segement3 = drawSphere(worm, worm.center4, worm.radius, ray);
     
     
         // TESTING
     // set iChannel0 to 'Misc/Buffer A' and fetch sample
-    fragColor = createScene(worm, worm.center1, worm.center2, worm.center3, worm.center4, worm.radius, ray,
-              iMouse, vp, head, segement1, segement2, segement3);
+    fragColor = createScene(worm, worm.center1, worm.radius, ray,
+              iMouse, vp);
 }
