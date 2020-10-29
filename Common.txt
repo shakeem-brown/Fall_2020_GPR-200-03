@@ -184,8 +184,6 @@ void initRayOrtho(out sRay ray,
 //------------------------------------------------------------
 // WORM INFO
 
-
-
 struct wWorm
 {
     vec4 center1;
@@ -194,7 +192,6 @@ struct wWorm
     vec4 center4;
     float radius;
 };
-
 
 void initWorm(out wWorm worm, in vec4 center1, in vec4 center2,
               in vec4 center3, in vec4 center4,in float radius)
@@ -208,30 +205,11 @@ void initWorm(out wWorm worm, in vec4 center1, in vec4 center2,
     
 }
 
+//------------------------------------------------------------
+// WORM INFO
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+struct Light  
+{
+    vec3 direction;
+    float occlusion; 
+};
