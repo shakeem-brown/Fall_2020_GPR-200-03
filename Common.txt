@@ -32,14 +32,6 @@
 #define color4 vec4
 
 
-// sCoord: promotea 2D vector ro a 3D vector
-//  representing a point in space (z=1)
-//	 v: inputs 2D vector to be converted
-sBasis asBasis(in sCoord v)
-{
-    return sBasis(v, 1.0);
-}
-
 // asPoint: promote a 3D vector into a 4D vector 
 //	representing a point in space (w=1)
 //    v: input 3D vector to be converted

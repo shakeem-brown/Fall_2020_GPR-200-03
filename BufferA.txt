@@ -1,4 +1,4 @@
-// wrapAround: the function is suppose to wrape the worm accround itself according to
+// wrapAround: the function is suppose to wrap the worm itself according to
 // its neeares center piece.
 //		originalPos: the original positionof the worm
 //		nearPos: the nearest postion to be wrapped arround
