@@ -1,3 +1,6 @@
+/*
+	Authors: Andrew Barnett & Shakeem Brown
+*/
 // wrapAround: the function is suppose to wrap the worm itself according to
 // its neeares center piece.
 //		originalPos: the original positionof the worm

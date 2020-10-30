@@ -1,6 +1,8 @@
 // GLSL STARTER CODE BY DANIEL S. BUCKSTEIN
 //  -> COMMON TAB (shared with all other tabs)
-
+/*
+	Authors: Andrew Barnett & Shakeem Brown
+*/
 //------------------------------------------------------------
 // TYPE ALIASES & UTILITY FUNCTIONS
 
