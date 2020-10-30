@@ -4,54 +4,61 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-// color of the worm
+// wormColor: Defines one of the colors for the worm
 vec4 wormColor()
 {
-   vec4 sphere_color = vec4(0.0, 0.7, 1.0, 1.0); // blue
-    return sphere_color;
-
+   vec4 sphere_color = vec4(0.0, 0.3, 6.0, 1.0); // Dark blue
+    return sphere_color; // Returns the color of the worm
 }
 
+// wormColor2: Defines one of the colors for the worm
 vec4 wormColor2()
 {
    vec4 sphere_color = vec4(0.0, 1.0, 1.0, 1.0); // cyan
-    return sphere_color;
-
+    return sphere_color; // Returns the offset color of the worm
 }
 
+// mouseClickPos: returns the mouses's position
+//		mouse: the mouse's xyzw coordinates
 vec2 mouseClickPos(in vec4 mouse)
 {
-    if (mouse.z > 0.0)
+    if (mouse.z > 0.0) // checks if mouse is clicked
     {
-        return mouse.xy;
+        return mouse.xy; // returns the mouse position coords
     }
 }
 
+//	getRayLength: gets the length of the ray of the clicked position
+//		center1: the center of the worm's head
+//		mouse: the mouse's xyzw coordinates
 float getRayLength(in vec4 center1, in vec4 mouse)
 {
-    vec2 lengthDiff = center1.xy - mouseClickPos(mouse);
-    float theLength = length(lengthDiff);
-    return theLength;
+    vec2 lengthDiff = center1.xy - mouseClickPos(mouse); // the diiference in length
+    float theLength = length(lengthDiff); // the length of the ray of clicked position
+    return theLength; // returns the ray length
 }
 
+// getPos: defines the logic to get the worm to move to the clicked position
+//		center1: the center of the worm's head
+//		mouse: the mouse's xyzw coordinates
 vec2 getPos(in vec4 center1, in vec4 mouse)
 {
-    float rayLength = getRayLength(center1, mouse);
+    float rayLength = getRayLength(center1, mouse); // set the ray length found in the preivous function
 	float steps = 0.5;
     
-    if (mouse.z > 0.0)
+    if (mouse.z > 0.0) // checks if clicked
     {
-        if (center1.x != mouse.x)
+        if (center1.x != mouse.x) // if the center x coord does not equal the mouse x coord
         {
-            center1.x += steps;
+            center1.x = mouse.x; // set them equal
         }
 
-        if (center1.y != mouse.y)
+        if (center1.y != mouse.y) // if the center y coord does not equal the mouse y coord
         {
-            center1.y += steps;
+            center1.y = mouse.y; // set them equal
         }
     }
-    return center1.xy;
+    return center1.xy; // returns the new center
 }
 
 /*
@@ -87,8 +94,8 @@ vec4 shadingEffect(in vec2 location, in float time, in vec2 xy_textureCoord, in 
     float alpha = 1.0; // the alpha
     vec4 light_color = vec4(gray, alpha); // Gray Scaled light
     vec4 light_ambient_color = vec4(0.0); // black light
-    vec3 the_light = vec3(0.1, 2.0, 5.0); // the light vector
-    float intensity = 15.0; // the intensity of the light
+    vec3 the_light = vec3(1.0, 1.0, 0.2); // the light vector
+    float intensity = 0.002; // the intensity of the light
     
     float light_radius = 128.0; // the radius of the light
     float flickering_speed = 10.5; // the flickering speed of the light
@@ -97,8 +104,8 @@ vec4 shadingEffect(in vec2 location, in float time, in vec2 xy_textureCoord, in 
     
     // the delta of the light image in relation to the uv and the screen (& texture later on)
     vec3 delta = vec3(location - xy_textureCoord, location.x);
-    delta.x /= light_radius / resolution.x; // makes the light's delta.x fixed to the radius
-    delta.y /= light_radius / resolution.y; // makes the light's delta.y fixed to the radius
+    delta.x *= light_radius * resolution.x; // makes the light's delta.x fixed to the radius
+    delta.y *= light_radius * resolution.y; // makes the light's delta.y fixed to the radius
 	
     // The distance from the light to the image
     float fragDistoLight = lengthOfVector(delta);
@@ -126,85 +133,107 @@ vec4 shadingEffect(in vec2 location, in float time, in vec2 xy_textureCoord, in 
 }
 
 
+// blinn_phong: creates a flickering red light
+//		ray: output ray
+//		center1: the center of the worm's head
+//		light: holds the light info
+//		time: the time
+//		position: the postion of the light
+//		worm: holds the worm info
 vec3 blinn_phong(in sRay ray, in vec4 center1, in lLight light,
                  in float time, in vec3 position, in wWorm worm)
 {
-    vec3 lightColor = vec3(0.25, 1.0, 0.7);
+    vec3 lightColor = vec3(1.0, 0.0, 0.0); // red
+    vec3 wNorm = normalize(position - center1.xyz); // normalized position minus the center of the worm
+    vec3 lightPos = normalize(light.center.xyz - position); // normalized center minus the position of the light
+    float difCoefficient = max(0.0, dot(wNorm, lightPos)); // the diffuse coefficent
+    vec3 lightDis = vec3(light.center.xyz - worm.radius); // the light distance
     
-    vec3 wNorm = normalize(position - center1.xyz);
-    vec3 lightPos = normalize(light.center.xyz - position); 
-    float difCoefficient = max(0.0, dot(wNorm, lightPos)); 
-    vec3 lightDis = vec3(light.center.xyz - worm.radius);
     vec3 attenuation = 1.0 / (1.0 + (lightDis / light.intensity) +
-                                  (lightDis * lightDis) / (light.intensity * light.intensity));
-     vec3 viewVec = normalize(ray.origin.xyz - position);
+        (lightDis * lightDis) / (light.intensity * light.intensity)); // the attenuation of the light
+     vec3 viewVec = normalize(ray.origin.xyz - position); // the view vector
     
+    float highExpo = pow( 2.0, 3.0); // the high exponent
+    vec3 difIntensity = vec3(difCoefficient * attenuation); // the diffuse inensity
     
-    float highExpo = pow( 2.0, 3.0);
-    vec3 difIntensity = vec3(difCoefficient * attenuation);
-    
-    if (time > 0.0)
+    if (sin(time) > 0.0) // checks if delta is greater than 0.0
     {
-        float timeScalar = time * 0.2;
-        vec3 half_vector = normalize(lightPos + viewVec); 
-        float blinnCoefficient = dot(wNorm, half_vector); 
-        float blinnHighExpo = (4.0 * highExpo); 
-        float blinnSpecIntesnity = pow(blinnCoefficient, blinnHighExpo); 
-        vec3 blinn_phong_color =  vec3(difIntensity * lightColor);
-        return blinn_phong_color;
+        vec3 half_vector = normalize(lightPos + viewVec); // the normalzied light position + viewvector
+        float blinnCoefficient = dot(wNorm, half_vector); // blinn coefficent
+        float blinnHighExpo = (4.0 * highExpo); // blinn high exponent
+        float blinnSpecIntesnity = pow(blinnCoefficient, blinnHighExpo); // the blinn spec intnensity 
+        vec3 blinn_phong_color =  vec3(difIntensity * lightColor); // the blinn phong color
+        return blinn_phong_color; // returns the blinn phong light
     }
 }
 
+// createScene: creates the space where objects are being added to the world/ scene
+//		worm: holds the worm info
+//		center1: the center of the worm's head
+//		radius: the radius of the sgements and head of the worm
+//		ray: output ray
+//		mouse: the mouse's xyzw coordinates
+//		vp: holds the viewport info
+//		color: the worm color
+//		light: holds the light info
+//		time: the time
 vec4 createScene(in wWorm worm, in vec4 center1,in float radius, in sRay ray,
               in vec4 mouse, in sViewport vp, in vec4 color, in lLight light, in float time)
 {
+    vec3 dp; // dotproduct
+    dp.xy = ray.direction.xy - worm.center1.xy; //the difference in direction from the worm center
+    float lSq = dot(dp.xy, dp.xy); // the length square
+    float rSq = worm.radius * worm.radius; // the radius square
     
-    // ********* THE WORMHEAD *********  
-    vec3 dp;
-    dp.xy = ray.direction.xy - worm.center1.xy; 
-    float lSq = dot(dp.xy, dp.xy);
-    float rSq = worm.radius * worm.radius;
-    vec3 position = center1.xyz + vec3(dp.x, dp.y, sqrt(dp.z));
-    const vec2 shift = vec2(0.05, 0.05);
-    float segmentCount = 6.0;
+    vec3 position = center1.xyz + vec3(dp.x, dp.y, sqrt(dp.z)); // the position of the lighting
+    const vec2 shift = vec2(0.05, 0.05); // the shift of the body segements
+    float segmentCount = 6.0; // the number of segements of the worm's body
     
-    // ********* THE Light *********  
+    // Defines a blue Square vec4
+    vec4 theWorm1 = vec4(mix(texture(iChannel1, ray.direction.xy).xyz, wormColor().xyz, 1.0), 1.0);
+    
+    //Defines a cyan square vec4
+    vec4 theWorm2 = vec4(mix(texture(iChannel1, ray.direction.xy).xyz, wormColor2().xyz, 1.0), 1.0);
+    
+    // ********* THE Light IN WORM HEAD *********  
     vec4 light_color = vec4(blinn_phong(ray, center1, light,
-                 time, position, worm), 1.0);
-        light_color *= 2.0 * sin(time);
+                 time, position, worm), 1.0); // the blin lighting
+        light_color *= 2.0 * sin(time); // createsa on and off effect
     
-    // ********* THE WALLS *********
-    
-    //Make worm shape
-    if (lSq  <= rSq)
+    // ********* THE WORM HEAD *********  
+    if (lSq  <= rSq) // if inside the shpere
     {
-        vec4 theWorm = vec4(mix(texture(iChannel1, ray.direction.xy).xyz, wormColor().xyz, 1.0), 1.0);
-        theWorm += light_color;
-        return theWorm;
+        theWorm1 += light_color; // adds the light to the worm's head
+        return theWorm1; // returns blue sphere as the wprm head
     }
     
+    // ********* THE WORM SEGMENTS *********  
     for (float i = 0.0; i < segmentCount; i++)
     {
-        dp.xy += shift; 
-        lSq = dot(dp.xy, dp.xy);
-        rSq = worm.radius * worm.radius;
+        dp.xy += shift; // adding the shift to off set the center of the sphere
+        lSq = dot(dp.xy, dp.xy); // changes the squared length accoring to the new shift
     
-        //Make worm shape
-        if (lSq <= rSq)
+        if (lSq <= rSq) // if inside the shpere
         {
-            vec4 theWorm = vec4(mix(texture(iChannel1, ray.direction.xy).xyz, wormColor2().xyz, 1.0), 1.0);
-            theWorm += light_color;
-            return theWorm;
+            if(mod(i, 2.0) == 0.0) // helps alternate the 2 colors
+            {
+                return theWorm2; // returns cyan sphere
+            }
+            else
+            {
+        		return theWorm1; // returns blue sphere
+            }
         }
     }
      
 
     // ********* THE FLOOR *********
-    vec4 theFloor = texture(iChannel0, vp.uv);
-    // Lampert Shading Effect
+    vec4 theFloor = texture(iChannel0, vp.uv); // defing the floor texture
+    
+    // Lampert Shading on the floor
     vec4 lampertLight = shadingEffect(vp.uv, time, vp.uv, vp.resolution, theFloor);
-    theFloor += light_color + lampertLight;
-    return theFloor;
+    theFloor += light_color + lampertLight; // adding blin light and the shading to textured floor
+    return theFloor; // returns the floor
 }
 
 
@@ -223,7 +252,7 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     // viewport info
     sViewport vp;
     
-      // render
+     // render
     initViewport(vp, viewportHeight, focalLength, fragCoord, iResolution.xy);
     initRayPersp(ray, eyePosition, vp.viewportPoint.xyz);
     
@@ -238,14 +267,11 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     // light
     lLight light;
     light.intensity = 1.0;
-
     vec4 lightCenter2 = vec4(worm.center1.x + 0.01, worm.center1.y + 0.01, worm.center1.z + 8.0, worm.center1.w);
     vec4 lightCenter = vec4(getPos(lightCenter2, mouse_input), -4.0, 1.0);
     initLight(light, lightCenter, light.intensity);
     
-    
-        // TESTING
-    // set iChannel0 to 'Misc/Buffer A' and fetch sample
+	// output to the screen
     fragColor = createScene(worm, iMouse, worm.radius, ray,
               iMouse, vp, color, light, iTime);
 }
