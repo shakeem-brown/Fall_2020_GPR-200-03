@@ -18,33 +18,11 @@ vec4 wormColor2()
     return sphere_color; // Returns the offset color of the worm
 }
 
-// mouseClickPos: returns the mouses's position
-//		mouse: the mouse's xyzw coordinates
-vec2 mouseClickPos(in vec4 mouse)
-{
-    if (mouse.z > 0.0) // checks if mouse is clicked
-    {
-        return mouse.xy; // returns the mouse position coords
-    }
-}
-
-//	getRayLength: gets the length of the ray of the clicked position
-//		center1: the center of the worm's head
-//		mouse: the mouse's xyzw coordinates
-float getRayLength(in vec4 center1, in vec4 mouse)
-{
-    vec2 lengthDiff = center1.xy - mouseClickPos(mouse); // the diiference in length
-    float theLength = length(lengthDiff); // the length of the ray of clicked position
-    return theLength; // returns the ray length
-}
-
 // getPos: defines the logic to get the worm to move to the clicked position
 //		center1: the center of the worm's head
 //		mouse: the mouse's xyzw coordinates
 vec2 getPos(in vec4 center1, in vec4 mouse)
 {
-    float rayLength = getRayLength(center1, mouse); // set the ray length found in the preivous function
-	float steps = 0.5;
     
     if (mouse.z > 0.0) // checks if clicked
     {
