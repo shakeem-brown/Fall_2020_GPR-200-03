@@ -201,11 +201,18 @@ void initWorm(out wWorm worm, in vec4 center1,in float radius)
 //------------------------------------------------------------
 // WORM INFO
 
-struct Light  
+struct lLight  
 {
-    vec3 direction;
-    float occlusion; 
+    vec4 center;
+    float intensity;
 };
+    
+void initLight(out lLight light, in vec4 center, in float intensity)
+{
+    light.center = center;
+    light.intensity = intensity;
+    
+}
     
     #define T(i,j)         texelFetch(iChannel0,ivec2(i,j),0)
     #define rot(a) mat2(cos( a + vec4(0,33,11,0)))   // From https://www.shadertoy.com/view/XlsyWX

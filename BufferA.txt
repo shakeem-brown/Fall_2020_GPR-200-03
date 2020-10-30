@@ -34,14 +34,6 @@ vec4 theHead(in sViewport vp, in wWorm worm, in int frame, out vec4 color)
 }
 */
 
-// color of the worm
-vec4 drawSphere(in wWorm worm, in vec4 center1, in float radius, in sRay ray)
-{
-   vec4 sphere_color = vec4(0.0, 0.0, 1.0, 1.0); // blue
-    return sphere_color;
-
-}
-
 
 //have a seprate check (has an x and y of the mouse)
 // if the mousex and y is not the same as the center update
@@ -67,60 +59,27 @@ vec4 checkAndUpdate(in sViewport vp, in vec4 center1, in vec4 mouse)
         center1 = vec4(center1.y + INCREMENTOR, center1.xzw);
     }
     
-    return center1;
+    if (center1.x == diff.x && center1.y == diff.y)
+    {
+        return center1;
+    }
+    
 }
 
 
 vec4 headMovement(in wWorm worm, in sRay ray, in vec4 mouse, in sViewport vp)
 {
-    vec4 head = worm.center1;
     
-    //head = drawSphere(worm, worm.center1, worm.radius, ray);
-    head = checkAndUpdate(vp, worm.center1, mouse);
+    vec4 head = checkAndUpdate(vp, worm.center1, mouse);
      return head;
 }
 
-vec2 getDirection(in vec4 center1, in sViewport vp, in vec4 mouse, in wWorm worm)
-{
-    float diameter = worm.radius * 2.0;
-    
-    vec2 mouse_input =  mouse.xy * vp.resolutionInv;
-    vec4 mouse_center = vec4(vp.uv.x - mouse.x, vp.uv.y - mouse.y, mouse.z, 1.0);
-    float xDiff = mouse_input.x - center1.x;
-    float yDiff = mouse_input.y - center1.y;
-    
-    vec2 direction;
-    
-    // Defining movement of the worm
-    if (abs(xDiff) > abs(yDiff)) // x case
-    {
-        if (xDiff > 0.0)
-        {
-            direction = vec2(diameter, 0.0);
-        }
-        else
-        {
-            direction = vec2(-diameter, 0.0);
-        }
-    }
-    else // y case
-    {
-        if (yDiff > 0.0)
-        {
-            direction = vec2(0.0, diameter);
-        }
-        else
-        {
-            direction = vec2(0.0, -diameter);
-        }
-    }
-    
-    return center1.xy + direction;
-}
+
+
 
 
 // Supposes to make a trail for the worm for the body
-vec4 wormBuilder(in vec4 head, in wWorm worm, in sRay ray)
+vec4 wormBuilder(in wWorm worm, in sRay ray, in vec4 mouse, in sViewport vp)
 {
     vec3 rotation = vec3(0.2, 0.2, 0.2);
     vec3 test = vecP(ray.direction.xyz, rotation);
@@ -128,7 +87,7 @@ vec4 wormBuilder(in vec4 head, in wWorm worm, in sRay ray)
     float wormLength = 4.0;
     float dis;
     
-    vec4 wormOutput = vec4(0.0);
+    vec4 wormOutput =  headMovement(worm, ray, mouse, vp);
     for (float i = wormLength; i > 0.0; --i)
     {
         test = T(i,0.0).xyz;
@@ -139,23 +98,12 @@ vec4 wormBuilder(in vec4 head, in wWorm worm, in sRay ray)
     return wormOutput;
 }
 
-vec4 getInput(in vec4 mouse, in sViewport vp, in wWorm worm, in vec4 center1,
-              in float radius, in sRay ray)
+vec4 getInput(in vec4 mouse, in sViewport vp, in wWorm worm, in float radius, in sRay ray, in vec4 head)
 {
-    vec4 head = center1;
-    vec2 mouse_input =  mouse.xy * vp.resolutionInv;
-    vec4 mouse_center = vec4(ray.direction.x - mouse.x, ray.direction.y - mouse.y, mouse.z, 1.0);
+     initWorm(worm, worm.center1, worm.radius);
+    vec4 theHead =  wormBuilder(worm, ray, mouse, vp);
     
-    
-    float diameter = worm.radius * 2.0;
-    initWorm(worm, worm.center1, worm.radius);
-    
-    head = drawSphere(worm, worm.center1, worm.radius, ray); // headMovement
-    
-    vec4 headDirection = vec4(getDirection(center1, vp, mouse, worm), mouse.z, 1.0);
-
-    
-    return vec4(wormBuilder(head, worm, ray) + headDirection);
+    return theHead;
 
 }
 
@@ -179,11 +127,7 @@ void mainImage( out vec4 fragColor, in sCoord fragCoord )
     
     // worm
     wWorm worm;
-    worm.radius = 0.2; 
-    worm.center1 = vec4(0.0, 0.0, -4.0, 1.0);
-    vec4 head = drawSphere(worm, worm.center1, worm.radius, ray);
-    vec4 center = checkAndUpdate(vp, worm.center1, iMouse);
+    worm.center1 = wormBuilder(worm, ray, iMouse, vp);
     
-    
-    fragColor = getInput(iMouse, vp, worm, center, worm.radius, ray);
+    fragColor = getInput(iMouse, vp, worm, worm.radius, ray, worm.center1);
 }

@@ -4,30 +4,102 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-
-
-vec3 blinn_phong(in sRay ray, in wWorm worm, in Light light, in float time)
+// color of the worm
+vec4 wormColor()
 {
-    return vec3(0.0);
+   vec4 sphere_color = vec4(0.0, 0.0, 1.0, 1.0); // blue
+    return sphere_color;
+
+}
+
+vec2 mouseClickPos(in vec4 mouse)
+{
+    if (mouse.z > 0.0)
+    {
+        return mouse.xy;
+    }
+}
+
+float getRayLength(in vec4 center1, in vec4 mouse)
+{
+    vec2 lengthDiff = center1.xy - mouseClickPos(mouse);
+    float theLength = length(lengthDiff);
+    return theLength;
+}
+
+vec2 getPos(in vec4 center1, in vec4 mouse)
+{
+    float rayLength = getRayLength(center1, mouse);
+	float steps = 0.1;
+    
+    if (mouse.z > 0.0)
+    {
+        if (center1.x != mouse.x)
+        {
+            center1.x += steps;
+        }
+
+        if (center1.y != mouse.y)
+        {
+            center1.y += steps;
+        }
+    }
+    return center1.xy;
+}
+
+vec3 blinn_phong(in sRay ray, in vec4 center1, in lLight light,
+                 in float time, in vec3 position, in wWorm worm)
+{
+    vec3 lightColor = vec3(1.0, 0.0, 0.0);
+    
+    vec3 wNorm = normalize(position - center1.xyz);
+    vec3 lightPos = normalize(light.center.xyz - position); 
+    float difCoefficient = max(0.0, dot(wNorm, lightPos)); 
+    vec3 lightDis = vec3(light.center.xyz - worm.radius);
+    vec3 attenuation = 1.0 / (1.0 + (lightDis / light.intensity) +
+                                  (lightDis * lightDis) / (light.intensity * light.intensity));
+     vec3 viewVec = normalize(ray.origin.xyz - position);
+    
+    
+    float highExpo = pow( 2.0, 3.0);
+    vec3 difIntensity = vec3(difCoefficient * attenuation);
+    
+    if (time > 0.0)
+    {
+        float timeScalar = time * 0.2;
+        vec3 half_vector = normalize(lightPos + viewVec); 
+        float blinnCoefficient = dot(wNorm, half_vector); 
+        float blinnHighExpo = (4.0 * highExpo); 
+        float blinnSpecIntesnity = pow(blinnCoefficient, blinnHighExpo); 
+        vec3 blinn_phong_color =  vec3(difIntensity * lightColor);
+        return blinn_phong_color;
+    }
 }
 
 vec4 createScene(in wWorm worm, in vec4 center1,in float radius, in sRay ray,
-              in vec4 mouse, in sViewport vp)
+              in vec4 mouse, in sViewport vp, in vec4 color, in lLight light, in float time)
 {
     
     // ********* THE WALLS *********
     
-    // ********* THE WORMHEAD *********
+    // ********* THE WORMHEAD & Light *********  
     vec3 dp;
-    
     dp.xy = ray.direction.xy - worm.center1.xy; 
     float lSq = dot(dp.xy, dp.xy);
     float rSq = worm.radius * worm.radius;
+    vec3 position = center1.xyz + vec3(dp.x, dp.y, sqrt(dp.z));
     
-	if (lSq <= rSq && mouse.z > 0.0 )
+    
+	if (lSq <= rSq)
     {
-        return texture(iChannel1, ray.direction.xy);
+        vec4 light_color = vec4(blinn_phong(ray, center1, light,
+                 time, position, worm), 1.0);
+        light_color *= 2.0 * sin(time);
+        vec4 theWorm = vec4(mix(texture(iChannel1, ray.direction.xy).xyz, color.xyz, 1.0), 1.0);
+        theWorm += light_color;
+        return theWorm;
     }
+       
     
     // ********* THE FLOOR *********
     vec4 theFloor = texture(iChannel0, vp.uv);
@@ -56,12 +128,22 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     
     // worm
     wWorm worm;
-    worm.radius = 0.2; 
-    worm.center1 = vec4(0.0, 0.0, -4.0, 1.0);
+    worm.radius = 0.2;
+    vec4 centerStart = vec4(0.0, 0.0, -4.0, 1.0);
+    vec4 mouse_input = vec4(iMouse.xy * vp.resolutionInv, iMouse.zw);
+    worm.center1 = vec4(getPos(centerStart, mouse_input), -4.0, 1.0);
+    vec4 color = wormColor();
+    
+    // light
+    lLight light;
+    light.intensity = 1.0;
+    vec4 lightCenter2 = vec4(worm.center1.x - 0.3, worm.center1.y - 0.3, worm.center1.z - 1.0, worm.center1.w);
+    vec4 lightCenter = vec4(getPos(lightCenter2, mouse_input), -4.0, 1.0);
+    initLight(light, lightCenter, light.intensity);
     
     
         // TESTING
     // set iChannel0 to 'Misc/Buffer A' and fetch sample
     fragColor = createScene(worm, worm.center1, worm.radius, ray,
-              iMouse, vp);
+              iMouse, vp, color, light, iTime);
 }
