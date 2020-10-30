@@ -12,6 +12,13 @@ vec4 wormColor()
 
 }
 
+vec4 wormColor2()
+{
+   vec4 sphere_color = vec4(0.0, 1.0, 1.0, 1.0); // cyan
+    return sphere_color;
+
+}
+
 vec2 mouseClickPos(in vec4 mouse)
 {
     if (mouse.z > 0.0)
@@ -27,7 +34,7 @@ float getRayLength(in vec4 center1, in vec4 mouse)
     return theLength;
 }
 
-vec2 getPos(in vec4 center1, in vec4 mouse)
+vec2 getPos(in vec4 center1, in vec4 mouse, in vec2 uv)
 {
     float rayLength = getRayLength(center1, mouse);
 	float steps = 0.1;
@@ -47,10 +54,82 @@ vec2 getPos(in vec4 center1, in vec4 mouse)
     return center1.xy;
 }
 
+/*
+	Function Entirely by @ Impossible 
+				https://www.shadertoy.com/view/4tfGWl
+	Modification by: Shakeem Brown
+	Modification Reason: outsourced the dotproduct function into my own
+				         dot product function
+*/
+// dither: is an implementation done by impossible that has special numbers that aids in my lampert shading
+//		vScreenPos: is the screen position
+//		time: is the time
+vec3 dither(in vec2 vScreenPos, in float time)
+{
+    vec2 vector2 = vec2(171.0, 231.0);
+    vec2 theTime = vec2(time);
+    vec2 screenPos_time = vScreenPos.xy + theTime;
+	vec3 vDither = vec3(dot(vector2, screenPos_time));
+	vDither.rgb = fract(vDither.rgb / vec3(103.0, 71.0, 97.0)) - vec3(0.5, 0.5, 0.5);
+	return ( vDither.rgb / 255.0 ) * 0.375;
+}
+
+// shadingEffect: is the function the implements lampertshading and light according to the texture
+//		location: is the pixel coordinate but scalled to the resolution.
+//		time: is the time
+//		xy_textureCoord: the uv
+//		resolution: the resolution of the screen
+//		image: the image/ texture
+vec4 shadingEffect(in vec2 location, in float time, in vec2 xy_textureCoord, in vec2 resolution, in vec4 image)
+{
+    vec2 px = xy_textureCoord * resolution; // the pixel coordinant
+    vec3 gray = vec3(0.5); // the color gray
+    float alpha = 1.0; // the alpha
+    vec4 light_color = vec4(gray, alpha); // Gray Scaled light
+    vec4 light_ambient_color = vec4(0.0); // black light
+    vec3 the_light = vec3(0.1, 2.0, 5.0); // the light vector
+    float intensity = 15.0; // the intensity of the light
+    
+    float light_radius = 128.0; // the radius of the light
+    float flickering_speed = 10.5; // the flickering speed of the light
+    float flickering_offset = 50.0; // the flickering speed offset
+    light_radius += sin(time * flickering_speed) * flickering_offset; // the flickering effect
+    
+    // the delta of the light image in relation to the uv and the screen (& texture later on)
+    vec3 delta = vec3(location - xy_textureCoord, location.x);
+    delta.x /= light_radius / resolution.x; // makes the light's delta.x fixed to the radius
+    delta.y /= light_radius / resolution.y; // makes the light's delta.y fixed to the radius
+	
+    // The distance from the light to the image
+    float fragDistoLight = lengthOfVector(delta);
+    
+    // The normalzied light color
+    vec3 normal_light_color = light_color.rbg * light_color.a;
+    
+    // the normalized light ambiance color
+    vec3 normal_light_ambient_color = light_ambient_color.rgb * light_ambient_color.a;
+    
+    // Calculates the attenuation of the light
+    float attenuation = intensity / (the_light.x + (the_light.y * fragDistoLight) +
+                                     (the_light.z * fragDistoLight * fragDistoLight));
+	
+    // the new light after combining the privous calculations
+    vec3 new_light = normal_light_ambient_color + normal_light_color * attenuation;
+    new_light = pow(new_light, gray); // the new light raised to the color gray
+    new_light += dither(px.xy, time); // using impossible's function to add to the new light
+    
+    // The final shading lampert shading
+    vec4 shadingEffectVector = vec4(vec3(image.r) * new_light, image.a);
+    
+    return shadingEffectVector; // returning the lampert shading effect with flickering
+
+}
+
+
 vec3 blinn_phong(in sRay ray, in vec4 center1, in lLight light,
                  in float time, in vec3 position, in wWorm worm)
 {
-    vec3 lightColor = vec3(1.0, 0.0, 0.0);
+    vec3 lightColor = vec3(1.0, 1.0, 1.0);
     
     vec3 wNorm = normalize(position - center1.xyz);
     vec3 lightPos = normalize(light.center.xyz - position); 
@@ -80,29 +159,51 @@ vec4 createScene(in wWorm worm, in vec4 center1,in float radius, in sRay ray,
               in vec4 mouse, in sViewport vp, in vec4 color, in lLight light, in float time)
 {
     
-    // ********* THE WALLS *********
-    
-    // ********* THE WORMHEAD & Light *********  
+    // ********* THE WORMHEAD *********  
     vec3 dp;
     dp.xy = ray.direction.xy - worm.center1.xy; 
     float lSq = dot(dp.xy, dp.xy);
     float rSq = worm.radius * worm.radius;
     vec3 position = center1.xyz + vec3(dp.x, dp.y, sqrt(dp.z));
+    const vec2 shift = vec2(0.05, 0.05);
+    float segmentCount = 6.0;
     
-    
-	if (lSq <= rSq)
-    {
-        vec4 light_color = vec4(blinn_phong(ray, center1, light,
+    // ********* THE Light *********  
+    vec4 light_color = vec4(blinn_phong(ray, center1, light,
                  time, position, worm), 1.0);
         light_color *= 2.0 * sin(time);
-        vec4 theWorm = vec4(mix(texture(iChannel1, ray.direction.xy).xyz, color.xyz, 1.0), 1.0);
+    
+    // ********* THE WALLS *********
+    
+    //Make worm shape
+    if (lSq  <= rSq)
+    {
+        vec4 theWorm = vec4(mix(texture(iChannel1, ray.direction.xy).xyz, wormColor().xyz, 1.0), 1.0);
         theWorm += light_color;
         return theWorm;
     }
-       
     
+    for (float i = 0.0; i < segmentCount; i++)
+    {
+        dp.xy += shift; 
+        lSq = dot(dp.xy, dp.xy);
+        rSq = worm.radius * worm.radius;
+    
+        //Make worm shape
+        if (lSq <= rSq)
+        {
+            vec4 theWorm = vec4(mix(texture(iChannel1, ray.direction.xy).xyz, wormColor2().xyz, 1.0), 1.0);
+            theWorm += light_color;
+            return theWorm;
+        }
+    }
+     
+
     // ********* THE FLOOR *********
     vec4 theFloor = texture(iChannel0, vp.uv);
+    // Lampert Shading Effect
+    vec4 lampertLight = shadingEffect(vp.uv, time, vp.uv, vp.resolution, theFloor);
+    theFloor += light_color + lampertLight;
     return theFloor;
 }
 
@@ -131,19 +232,19 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     worm.radius = 0.2;
     vec4 centerStart = vec4(0.0, 0.0, -4.0, 1.0);
     vec4 mouse_input = vec4(iMouse.xy * vp.resolutionInv, iMouse.zw);
-    worm.center1 = vec4(getPos(centerStart, mouse_input), -4.0, 1.0);
+    worm.center1 = vec4(getPos(centerStart, mouse_input, vp.uv), -4.0, 1.0);
     vec4 color = wormColor();
     
     // light
     lLight light;
     light.intensity = 1.0;
-    vec4 lightCenter2 = vec4(worm.center1.x - 0.3, worm.center1.y - 0.3, worm.center1.z - 1.0, worm.center1.w);
-    vec4 lightCenter = vec4(getPos(lightCenter2, mouse_input), -4.0, 1.0);
+    vec4 lightCenter2 = vec4(worm.center1.x + 0.3, worm.center1.y + 0.3, worm.center1.z - 1.0, worm.center1.w);
+    vec4 lightCenter = vec4(getPos(lightCenter2, mouse_input, vp.uv), -4.0, 1.0);
     initLight(light, lightCenter, light.intensity);
     
     
         // TESTING
     // set iChannel0 to 'Misc/Buffer A' and fetch sample
-    fragColor = createScene(worm, worm.center1, worm.radius, ray,
+    fragColor = createScene(worm, iMouse, worm.radius, ray,
               iMouse, vp, color, light, iTime);
 }

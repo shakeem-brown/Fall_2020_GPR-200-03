@@ -1,38 +1,16 @@
-/*vec3 wrapAround(in vec3 originalPos, in vec3 nearPos, in vec3 r)
+vec3 wrapAround(in vec3 originalPos, in vec2 nearPos, in vec2 screen)
 {
-    vec3 pos = mod(originalPos, r);
-    float midX = r.x / 2.0;
-    float midY = r.y / 2.0;
-    if (nearPos.x < midX && pos.x > midX) pos.x -= r.x;
-    if (nearPos.y < midY && pos.y > midY) pos.y -= r.y;
-    if (nearPos.x > midX && pos.x < midX) pos.x += r.x;
-    if (nearPos.y > midY && pos.y < midY) pos.y += r.y;
+    vec3 pos = mod(originalPos, vec3(screen, 1.0));
+    float midX = screen.x / 2.0;
+    float midY = screen.y / 2.0;
+    if (nearPos.x < midX && pos.x > midX) pos.x -= screen.x;
+    if (nearPos.y < midY && pos.y > midY) pos.y -= screen.y;
+    if (nearPos.x > midX && pos.x < midX) pos.x += screen.x;
+    if (nearPos.y > midY && pos.y < midY) pos.y += screen.y;
     
     return pos; 
 }
 
-vec4 theHead(in sViewport vp, in wWorm worm, in int frame, out vec4 color)
-{
-    vp.pixelCoord -=0.5;
-    float i = vp.pixelCoord.x, j = vp.pixelCoord.y;
-    vec3 r = vec3(400.0 * vp.resolution.xy * vp.resolutionInv.y, 1.0);
-    
-    if (frame == 0)
-    {
-        if (j == 0.0)
-        {
-            if (i == 0.0)
-            {
-                color.z = A0;
-            }
-            float wLength = 4.0;
-            i = (wLength - i) - 1.0;
-            //color.xy = mod();
-        }
-    }
-    return vec4(1.0);
-}
-*/
 
 
 //have a seprate check (has an x and y of the mouse)
@@ -67,46 +45,6 @@ vec4 checkAndUpdate(in sViewport vp, in vec4 center1, in vec4 mouse)
 }
 
 
-vec4 headMovement(in wWorm worm, in sRay ray, in vec4 mouse, in sViewport vp)
-{
-    
-    vec4 head = checkAndUpdate(vp, worm.center1, mouse);
-     return head;
-}
-
-
-
-
-
-// Supposes to make a trail for the worm for the body
-vec4 wormBuilder(in wWorm worm, in sRay ray, in vec4 mouse, in sViewport vp)
-{
-    vec3 rotation = vec3(0.2, 0.2, 0.2);
-    vec3 test = vecP(ray.direction.xyz, rotation);
-    
-    float wormLength = 4.0;
-    float dis;
-    
-    vec4 wormOutput =  headMovement(worm, ray, mouse, vp);
-    for (float i = wormLength; i > 0.0; --i)
-    {
-        test = T(i,0.0).xyz;
-        dis = length(ray.direction.xyz - test);
-        wormOutput += vec4(mix(wormOutput, vec4(dis), smoothstep(.02, 0.0, dis - worm.radius)));
-    }
-    
-    return wormOutput;
-}
-
-vec4 getInput(in vec4 mouse, in sViewport vp, in wWorm worm, in float radius, in sRay ray, in vec4 head)
-{
-     initWorm(worm, worm.center1, worm.radius);
-    vec4 theHead =  wormBuilder(worm, ray, mouse, vp);
-    
-    return theHead;
-
-}
-
 
 void mainImage( out vec4 fragColor, in sCoord fragCoord )
 {
@@ -127,7 +65,6 @@ void mainImage( out vec4 fragColor, in sCoord fragCoord )
     
     // worm
     wWorm worm;
-    worm.center1 = wormBuilder(worm, ray, iMouse, vp);
     
-    fragColor = getInput(iMouse, vp, worm, worm.radius, ray, worm.center1);
+    fragColor = vec4(wrapAround(worm.center1.xyz, fragColor.zw, vp.pixelCoord), 1.0);
 }

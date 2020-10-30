@@ -228,7 +228,15 @@ vec3 vecP(in vec3 P, in vec3 a)
     return P;
 }
     
-    
+// lengthOfVector: the maginute of a vec3
+//		vector3: the vector being applied
+float lengthOfVector(in vec3 vector3)
+{
+    float theSQUR = 10.0; // the float used to get the square root
+    // the formula for the magintude of a vector 3
+    float theLength = ((vector3.x * vector3.x) + (vector3.y * vector3.y) + (vector3.z * vector3.z)) * theSQUR;
+ 	return theLength; // returns the maginutue
+} 
     
     
     
