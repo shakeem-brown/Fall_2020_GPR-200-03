@@ -7,7 +7,7 @@
 // color of the worm
 vec4 wormColor()
 {
-   vec4 sphere_color = vec4(0.0, 0.0, 1.0, 1.0); // blue
+   vec4 sphere_color = vec4(0.0, 0.7, 1.0, 1.0); // blue
     return sphere_color;
 
 }
@@ -34,10 +34,10 @@ float getRayLength(in vec4 center1, in vec4 mouse)
     return theLength;
 }
 
-vec2 getPos(in vec4 center1, in vec4 mouse, in vec2 uv)
+vec2 getPos(in vec4 center1, in vec4 mouse)
 {
     float rayLength = getRayLength(center1, mouse);
-	float steps = 0.1;
+	float steps = 0.5;
     
     if (mouse.z > 0.0)
     {
@@ -129,7 +129,7 @@ vec4 shadingEffect(in vec2 location, in float time, in vec2 xy_textureCoord, in 
 vec3 blinn_phong(in sRay ray, in vec4 center1, in lLight light,
                  in float time, in vec3 position, in wWorm worm)
 {
-    vec3 lightColor = vec3(1.0, 1.0, 1.0);
+    vec3 lightColor = vec3(0.25, 1.0, 0.7);
     
     vec3 wNorm = normalize(position - center1.xyz);
     vec3 lightPos = normalize(light.center.xyz - position); 
@@ -232,14 +232,15 @@ void mainImage(out color4 fragColor, in sCoord fragCoord)
     worm.radius = 0.2;
     vec4 centerStart = vec4(0.0, 0.0, -4.0, 1.0);
     vec4 mouse_input = vec4(iMouse.xy * vp.resolutionInv, iMouse.zw);
-    worm.center1 = vec4(getPos(centerStart, mouse_input, vp.uv), -4.0, 1.0);
+    worm.center1 = vec4(getPos(centerStart, mouse_input), -4.0, 1.0);
     vec4 color = wormColor();
     
     // light
     lLight light;
     light.intensity = 1.0;
-    vec4 lightCenter2 = vec4(worm.center1.x + 0.3, worm.center1.y + 0.3, worm.center1.z - 1.0, worm.center1.w);
-    vec4 lightCenter = vec4(getPos(lightCenter2, mouse_input, vp.uv), -4.0, 1.0);
+
+    vec4 lightCenter2 = vec4(worm.center1.x + 0.01, worm.center1.y + 0.01, worm.center1.z + 8.0, worm.center1.w);
+    vec4 lightCenter = vec4(getPos(lightCenter2, mouse_input), -4.0, 1.0);
     initLight(light, lightCenter, light.intensity);
     
     

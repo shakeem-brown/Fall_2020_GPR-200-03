@@ -66,5 +66,7 @@ void mainImage( out vec4 fragColor, in sCoord fragCoord )
     // worm
     wWorm worm;
     
-    fragColor = vec4(wrapAround(worm.center1.xyz, fragColor.zw, vp.pixelCoord), 1.0);
+    vec3 wormCenter = vec3(worm.center1.x, worm.center1.y, worm.center1.z);
+    
+    fragColor = vec4(wrapAround(wormCenter, fragColor.zw, vp.pixelCoord), 1.0);
 }
