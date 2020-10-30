@@ -95,12 +95,12 @@ vec4 shadingEffect(in vec2 location, in float time, in vec2 xy_textureCoord, in 
     vec4 light_color = vec4(gray, alpha); // Gray Scaled light
     vec4 light_ambient_color = vec4(0.0); // black light
     vec3 the_light = vec3(1.0, 1.0, 0.2); // the light vector
-    float intensity = 0.002; // the intensity of the light
+    float intensity = 2.0; // the intensity of the light
     
     float light_radius = 128.0; // the radius of the light
     float flickering_speed = 10.5; // the flickering speed of the light
     float flickering_offset = 50.0; // the flickering speed offset
-    light_radius += sin(time * flickering_speed) * flickering_offset; // the flickering effect
+    light_radius += cos(time * flickering_speed) * flickering_offset; // the flickering effect
     
     // the delta of the light image in relation to the uv and the screen (& texture later on)
     vec3 delta = vec3(location - xy_textureCoord, location.x);
