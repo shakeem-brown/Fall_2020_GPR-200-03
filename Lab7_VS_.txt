@@ -17,7 +17,7 @@ layout (location = 2) in vec4 aTexcoord;
 // TRANSFORM UNIFORMS
 uniform mat4 uModelMat;
 uniform mat4 uViewMat;
-uniform mat4 uProjectMat;
+uniform mat4 uProjMat;
 uniform mat4 uViewProjMat;
 
 // VARRYING
@@ -59,13 +59,13 @@ void main()
 	gl_Position = pos_clip;
 	
 	//NORMAL PIPELINE
-	mat3 normalMAT = inverse(transpose(mat3(modelViewMat3))));
+	mat3 normalMat = inverse(transpose(mat3(modelViewMat)));
 	vec3 nrm_view = normalMat * aNormal;
 	
 	// TEXCOORD PIPELINE
 	// (1, 1) & (2, 2) are the scalers
 	// (4, 1) & (4, 2) are the transformations
-	vec4 uv_atlas = mat4(0.5, 0.0, 0.0, 0.0,
+	mat4 atlasMat = mat4(0.5, 0.0, 0.0, 0.0,
 						 0.0, 0.5, 0.0, 0.0,
 						 0.0, 0.0, 1.0, 0.0,
 						 0.25, 0.25, 0.0, 1.0);
@@ -90,4 +90,5 @@ void main()
 	
 	gl_Position = uProjMat * modelViewMat * aTexcoord;
 }
+
 
