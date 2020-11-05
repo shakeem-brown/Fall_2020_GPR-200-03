@@ -1,0 +1,93 @@
+#version 300 es
+//#version 450
+
+//MAIN: process VERTEX ATTRIBUTES
+//	3D point in spaces
+//  normal vector
+//  uv: texture coordinate
+//  OBJECT-SPACE
+layout (location = 0) in vec4 aPosition;
+layout(location = 1) in vec3 aNormal;
+//in vec4 aPosition
+// TEXTURE SPACE
+//layout (location = 2) in vec2 aTexcoord;
+layout (location = 2) in vec4 aTexcoord;
+
+
+// TRANSFORM UNIFORMS
+uniform mat4 uModelMat;
+uniform mat4 uViewMat;
+uniform mat4 uProjectMat;
+uniform mat4 uViewProjMat;
+
+// VARRYING
+
+// PER-VERTEX: pass final color
+//out vec4 vColor;
+
+// PER-FRAGMENT: pass requirements
+out vec4 vNormal;
+
+//out vec2 vTexcoord;
+out vec4 vTexcoord;
+
+
+void main()
+{
+	//Require: write to this variable:
+	// problem: gl_Position is in "clip-space"
+	// problem: aPosition is in "object-space"
+	//gl_Position = aPosition;
+	
+	// position in world (not yet right)
+	// vec4 pos_view = uViewMat * pos_world;
+	// gl_Position = pos_world;
+	
+	// position in camera space (still not right)
+	//vec4 pos_view = uViewMat * pos_world;
+	//vec4 pos_view = uViewMat * uModelMat * aPosition;
+	//gl_Position = pos_view;
+	
+	// position in clip space (hooray)
+	//vec4 pos_clip = uViewProjMat * pos_world;
+	//vec4 pos_clip = uProjMat * uViewMat * uModelMat * aPosition;
+	
+	// POSITION PIPELINE
+	mat4 modelViewMat = uViewMat * uModelMat;
+	vec4 pos_view = modelViewMat * aPosition;
+	vec4 pos_clip = uProjMat * pos_view;
+	gl_Position = pos_clip;
+	
+	//NORMAL PIPELINE
+	mat3 normalMAT = inverse(transpose(mat3(modelViewMat3))));
+	vec3 nrm_view = normalMat * aNormal;
+	
+	// TEXCOORD PIPELINE
+	// (1, 1) & (2, 2) are the scalers
+	// (4, 1) & (4, 2) are the transformations
+	vec4 uv_atlas = mat4(0.5, 0.0, 0.0, 0.0,
+						 0.0, 0.5, 0.0, 0.0,
+						 0.0, 0.0, 1.0, 0.0,
+						 0.25, 0.25, 0.0, 1.0);
+	vec4 uv_atlas = atlasMat * aTexcoord;
+	
+	//  OPTIONAL: pass varyings
+	//vColor = vec4(1.0, 0.5, 0.0, 1.0);
+	//vColor = pos_view;
+	
+	// DEBUGGING
+	
+	// PER-VERTEX: output is final color
+	//vColor = aPosition;
+	// example: output normal as if it is color
+	//vColor = vec4(aNormal * 0.5 + 0.5, 1.0);
+	
+	// PER-FRAGMENT: output data needed for FS to calc final
+	//vNormal = vec4(aNormal, 0.0);
+	vNormal = vec4(nrm_view, 0.0);
+	
+	vTexcoord = aTexcoord;
+	
+	gl_Position = uProjMat * modelViewMat * aTexcoord;
+}
+
