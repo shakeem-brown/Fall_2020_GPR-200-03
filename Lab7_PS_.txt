@@ -18,20 +18,8 @@ layout (location = 0) out vec4 rtFragColor;
 in vec4 vColor;
 
 // LIGHT VARYINGS
-in vec3 vLightPos;
-in float vDifCoefficient;
-in vec3 vLightDis;
-in vec3 vAttenuation;
 in vec3 vDifIntensity;
-in vec3 vViewVec;
-in vec3 vRefLightVec;
-in float vSpecCoefficient;
-in float vHighExpo;
-in float vSpecIntensity;
-in vec3 vHalf_vector;
-in float vBlinnCoefficient;
-in float vBlinnHighExpo;
-in float vBlinnSpecIntesnity;
+in float vBlinnSpecIntensity;
 in vec4 textureView;
 in vec4 textureObj;
 
@@ -42,32 +30,37 @@ void main()
 	//PER-VERTEX: just displays the final color from VS
 	rtFragColor = vColor;
 	
+	/*
+		vec3 blinn_phong_color =  vec3(((difIntensity * baseLightColor.xyz) 
+   		+ (blinnSpecIntesnity * appliedColor)) * baseLightColor.xyz);
+	*/
+	
 	// PER-FRAGMENT VIEW SPACE
 	vec4 blinn_phong_color1_view =  vec4((((vDifIntensity * textureView.xyz) 
-   + (vBlinnSpecIntesnity * vec3(0.0, 0.0, 1.0))) * textureView.xyz), 1.0);
+   + (vBlinnSpecIntensity * vec3(0.0, 0.0, 1.0))) * textureView.xyz), 1.0);
    vec4 blinn_phong_color2_view =  vec4((((vDifIntensity * textureView.xyz) 
-   + (vBlinnSpecIntesnity * vec3(1.0, 0.0, 0.0))) * textureView.xyz), 1.0);
+   + (vBlinnSpecIntensity * vec3(1.0, 0.0, 0.0))) * textureView.xyz), 1.0);
    vec4 blinn_phong_color3_view =  vec4((((vDifIntensity * textureView.xyz) 
-   + (vBlinnSpecIntesnity * vec3(0.0, 1.0, 0.0))) * textureView.xyz), 1.0);
-   /*
-   rtFragColor = textureView;
-   rtFragColor += mix(blinn_phong_color1_view, blinn_phong_color2_view,
-    blinn_phong_color3_view);
-    */
+   + (vBlinnSpecIntensity * vec3(0.0, 1.0, 0.0))) * textureView.xyz), 1.0);
+   
+   //rtFragColor = textureView;
+   //rtFragColor += mix(blinn_phong_color1_view, blinn_phong_color2_view,
+   // blinn_phong_color3_view);
+    
    
    // PER-FRAGMENT OBJECT SPACE
-	vec4 blinn_phong_color1_obj =  vec4((((vDifIntensity * textureObj.xyz) 
-   + (vBlinnSpecIntesnity * vec3(0.0, 0.0, 1.0))) * textureObj.xyz), 1.0);
+	vec4 blinn_phong_color1_obj = vec4((((vDifIntensity * textureObj.xyz) 
+   + (vBlinnSpecIntensity * vec3(0.0, 0.0, 1.0))) * textureObj.xyz), 1.0);
    vec4 blinn_phong_color2_obj =  vec4((((vDifIntensity * textureObj.xyz) 
-   + (vBlinnSpecIntesnity * vec3(1.0, 0.0, 0.0))) * textureObj.xyz), 1.0);
+   + (vBlinnSpecIntensity * vec3(1.0, 0.0, 0.0))) * textureObj.xyz), 1.0);
    vec4 blinn_phong_color3_obj =  vec4((((vDifIntensity * textureObj.xyz) 
-   + (vBlinnSpecIntesnity * vec3(0.0, 1.0, 0.0))) * textureObj.xyz), 1.0);
+   + (vBlinnSpecIntensity * vec3(0.0, 1.0, 0.0))) * textureObj.xyz), 1.0);
 
-	/*
-   rtFragColor = textureObj;
+	///*
+   //rtFragColor = textureObj;
    rtFragColor += mix(blinn_phong_color1_obj, blinn_phong_color2_obj,
     blinn_phong_color3_obj);
-    */
+   // */
 }
 
 
