@@ -36,12 +36,12 @@ in vec4 textureObj;
 
 void main()
 {
-   //PER-VERTEX: just displays the final color from VS
-   rtFragColor = vColor;
+	//PER-VERTEX: just displays the final color from VS
+	rtFragColor = vColor;
 	
-   // PER-FRAGMENT VIEW SPACE
-   // LIGHT ONE ************************************************************
-   vec4 blinn_phong_color1_view =  vec4((((vDifIntensity1_view * textureView.xyz) 
+	// PER-FRAGMENT VIEW SPACE
+	// LIGHT ONE ************************************************************
+	vec4 blinn_phong_color1_view =  vec4((((vDifIntensity1_view * textureView.xyz) 
      + (vBlinnSpecIntensity1_view * vec3(0.0, 0.0, 1.0))) * textureView.xyz), 1.0);
      
    // LIGHT TWO ************************************************************
@@ -57,12 +57,12 @@ void main()
    rtFragColor = textureView;
    rtFragColor += mix(blinn_phong_color1_view, blinn_phong_color2_view,
     blinn_phong_color3_view);
-   */
+    */
     
    
    // PER-FRAGMENT OBJECT SPACE
    // LIGHT ONE ************************************************************
-   vec4 blinn_phong_color1_obj = vec4((((vDifIntensity1_obj * textureObj.xyz) 
+	vec4 blinn_phong_color1_obj = vec4((((vDifIntensity1_obj * textureObj.xyz) 
      + (vBlinnSpecIntensity1_obj * vec3(0.0, 0.0, 1.0))) * textureObj.xyz), 1.0);
    
    // LIGHT TWO ************************************************************
@@ -73,12 +73,12 @@ void main()
    vec4 blinn_phong_color3_obj =  vec4((((vDifIntensity3_obj * textureObj.xyz) 
      + (vBlinnSpecIntensity3_obj * vec3(0.0, 1.0, 0.0))) * textureObj.xyz), 1.0);
 
-   // Displays the light's in object space with a premierball texture
-   /*
+	// Displays the light's in object space with a heavyball texture
+	///*
    rtFragColor = textureObj;
-   rtFragColor += mix(blinn_phong_color1_obj, blinn_phong_color2_obj,
-    blinn_phong_color3_obj);
-   */
+   rtFragColor += blinn_phong_color1_obj + blinn_phong_color2_obj +
+    blinn_phong_color3_obj;
+   //*/
 }
 
 

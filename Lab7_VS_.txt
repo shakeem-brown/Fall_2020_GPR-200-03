@@ -63,11 +63,11 @@ out vec4 textureObj;
 vec3 calcDifIntensity(vec4 mPos,
 vec4 vPos, float intensity, vec3 lightCenter)
  {
-    vec3 lightPos = normalize(lightCenter - aPosition.xyz); // Calculates the light's position
-    float difCoefficient = max(0.0, dot(aNormal, lightPos)); // calculates the diffues coefficent
-    vec3 lightDis = vec3(lightCenter - 1.0);  // calculates the light's distance
-    vec3 attenuation = 1.0 / (1.0 + (lightDis / intensity)
-     + (lightDis * lightDis) / (intensity * intensity)); // calculates the attenuation
+ 	vec3 lightPos = normalize(lightCenter - aPosition.xyz); // Calculates the light's position
+	float difCoefficient = max(0.0, dot(aNormal, lightPos)); // calculates the diffues coefficent
+	vec3 lightDis = vec3(lightCenter - 1.0);  // calculates the light's distance
+	vec3 attenuation = 1.0 / (1.0 + (lightDis / intensity)
+	 + (lightDis * lightDis) / (intensity * intensity)); // calculates the attenuation
     vec3 difIntensity = vec3(difCoefficient * attenuation);  // calculates the diffuse intensity
     return difIntensity; // returns the diffuse intnesity
  }
@@ -104,14 +104,14 @@ float calcBlinnIntensity(vec4 mPos,
 vec3 calcBlinnPhong(vec3 appliedColor, vec4 mPos,
  vec4 vPos, float intensity, vec3 lightCenter, vec4 baseLightColor)
  {
-   vec3 difIntensity = calcDifIntensity(mPos,
-    vPos, intensity, lightCenter); // Calls the diffuse intensity function
+ 	vec3 difIntensity = calcDifIntensity(mPos,
+vPos, intensity, lightCenter); // Calls the diffuse intensity function
         
    float blinnSpecIntensity = calcBlinnIntensity(mPos,
-    vPos, intensity, lightCenter); //Calls the blinn specular intensity function
+ vPos, intensity, lightCenter); //Calls the blinn specular intensity function
    
    vec3 blinn_phong_color =  vec3(((difIntensity * baseLightColor.xyz) 
-    + (blinnSpecIntensity * appliedColor)) * baseLightColor.xyz); // Calculation the blinn phong effect/color
+   + (blinnSpecIntensity * appliedColor)) * baseLightColor.xyz); // Calculation the blinn phong effect/color
    return blinn_phong_color; // Returns the blinn phong effect/color
  }
 
@@ -129,8 +129,8 @@ void main()
 	vec4 beastball = texture(uTextureTwo, aTexcoord.xy); // Texture2
 	vec4 safariball = texture(uTextureThree, aTexcoord.xy); // Texture3
 	textureView = safariball;
-	vec4 premierball = texture(uTextureFour, aTexcoord.xy); // Texture4
-	textureObj = premierball;
+	vec4 heavyball = texture(uTextureFour, aTexcoord.xy); // Texture4
+	textureObj = heavyball;
 	
 	// LIGHT PIPELINE
 	mat3 lightViewMat = mat3(uViewMat); // View Space matrix
@@ -141,7 +141,7 @@ void main()
 	vec3 blue = vec3(0.0, 0.0, 1.0); // The applied Light color
 	
 	// CENTERS
-	vec3 lightCenter1 = vec3(10.0, -10.0, 10.0); // The light's world's space center
+	vec3 lightCenter1 = vec3(10.0, 0.0, 10.0); // The light's world's space center
 	vec3 lightCenter1_view = lightCenter1 * lightViewMat; // The light's view space center
 	vec3 lightCenter1_obj = lightCenter1 * lightObjMat; // The light's object space center
 	
@@ -154,15 +154,15 @@ void main()
 	 
 	 // LIGHT TWO ************************************************************
 	 // RED LIGHT
-	 vec3 red = vec3(1.0, 0.0, 0.0); // The applied Light color
+	vec3 red = vec3(1.0, 0.0, 0.0); // The applied Light color
 
-         // CENTERS
-         vec3 lightCenter2 = vec3(10.0, 0.0, 10.0); // The light's world's space center
-         vec3 lightCenter2_view = lightCenter2 * lightViewMat; // The light's view space center
-	 vec3 lightCenter2_obj = lightCenter2 * lightObjMat; // The light's object space center
+     // CENTERS
+	vec3 lightCenter2 = vec3(10.0, 10.0, 10.0); // The light's world's space center
+    vec3 lightCenter2_view = lightCenter2 * lightViewMat; // The light's view space center
+	vec3 lightCenter2_obj = lightCenter2 * lightObjMat; // The light's object space center
 	
 	// INTENSITY
-        float lightIntensity2 = 1.0; // The light's world space intensity
+    float lightIntensity2 = 1.0; // The light's world space intensity
 	vec4 light2_view = vec4(calcBlinnPhong(red, aPosition, pos_view,
 	 lightIntensity2, lightCenter2_view, pokeball), 1.0); // The light's view space intensity
 	vec4 light2_obj = vec4(calcBlinnPhong(red, aPosition, pos_view,
@@ -170,74 +170,74 @@ void main()
 	 
 	 // LIGHT THREE ************************************************************
 	 //GREEN LIGHT
-	 vec3 green = vec3(0.0, 1.0, 0.0); // The applied Light color
+	vec3 green = vec3(0.0, 1.0, 0.0); // The applied Light color
     
-         // CENTERS
-	 vec3 lightCenter3 = vec3(0.0, 10.0, 10.0); // The light's world's space center
-	 vec3 lightCenter3_view = lightCenter3 * lightViewMat; // The light's view space center
-	 vec3 lightCenter3_obj = lightCenter3 * lightObjMat; // The light's object space center
+     // CENTERS
+	vec3 lightCenter3 = vec3(0.0, 10.0, 10.0); // The light's world's space center
+	vec3 lightCenter3_view = lightCenter3 * lightViewMat; // The light's view space center
+	vec3 lightCenter3_obj = lightCenter3 * lightObjMat; // The light's object space center
 
-	 // INTENSITY
-         float lightIntensity3 = 0.8; // The light's world space intensity
-	 vec4 light3_view = vec4(calcBlinnPhong(green, aPosition, pos_view,
-	  lightIntensity3, lightCenter3_view, pokeball), 1.0); // The light's view space intensity
-	 vec4 light3_obj = vec4(calcBlinnPhong(green, aPosition, pos_view,
-	  lightIntensity3, lightCenter3_obj, beastball), 1.0); // The light's object space intensity
+	// INTENSITY
+    float lightIntensity3 = 0.8; // The light's world space intensity
+	vec4 light3_view = vec4(calcBlinnPhong(green, aPosition, pos_view,
+	 lightIntensity3, lightCenter3_view, pokeball), 1.0); // The light's view space intensity
+	vec4 light3_obj = vec4(calcBlinnPhong(green, aPosition, pos_view,
+	 lightIntensity3, lightCenter3_obj, beastball), 1.0); // The light's object space intensity
 	
-        // PER-FRAGMENT VIEW
-        // LIGHT ONE ************************************************************
-	// BLUE LIGHT'S VIEW SPACE INTENSITY
-        vDifIntensity1_view = calcDifIntensity(aPosition, pos_view, lightIntensity1,
-         lightCenter1_view); // The Diffuse Intensity
-        vBlinnSpecIntensity1_view =  calcBlinnIntensity(aPosition, pos_view, lightIntensity1,
-         lightCenter1_view); // The Blinn Specular Intensity
+     // PER-FRAGMENT VIEW
+     // LIGHT ONE ************************************************************
+	 // BLUE LIGHT'S VIEW SPACE INTENSITY
+     vDifIntensity1_view = calcDifIntensity(aPosition, pos_view, lightIntensity1,
+       lightCenter1_view); // The Diffuse Intensity
+     vBlinnSpecIntensity1_view =  calcBlinnIntensity(aPosition, pos_view, lightIntensity1,
+       lightCenter1_view); // The Blinn Specular Intensity
  	
-        // LIGHT TWO ************************************************************
-        // RED LIGHT'S VIEW SPACE INTENSITY
+ 	// LIGHT TWO ************************************************************
+    // RED LIGHT'S VIEW SPACE INTENSITY
  	vDifIntensity2_view = calcDifIntensity(aPosition, pos_view, lightIntensity2,
-         lightCenter2_view); // The Diffuse Intensity
-        vBlinnSpecIntensity2_view = calcBlinnIntensity(aPosition, pos_view, lightIntensity2,
-         lightCenter2_view); // The Blinn Specular Intensity
+      lightCenter2_view); // The Diffuse Intensity
+    vBlinnSpecIntensity2_view = calcBlinnIntensity(aPosition, pos_view, lightIntensity2,
+      lightCenter2_view); // The Blinn Specular Intensity
  
  	// LIGHT THREE ************************************************************
-        // GREEN LIGHT'S VIEW SPACE INTENSITY
-        vDifIntensity3_view = calcDifIntensity(aPosition, pos_view, lightIntensity3,
-         lightCenter3_view); // The Diffuse Intensity
-        vBlinnSpecIntensity3_view = calcBlinnIntensity(aPosition, pos_view, lightIntensity3,
-         lightCenter3_view); // The Blinn Specular Intensity
+    // GREEN LIGHT'S VIEW SPACE INTENSITY
+    vDifIntensity3_view = calcDifIntensity(aPosition, pos_view, lightIntensity3,
+      lightCenter3_view); // The Diffuse Intensity
+    vBlinnSpecIntensity3_view = calcBlinnIntensity(aPosition, pos_view, lightIntensity3,
+      lightCenter3_view); // The Blinn Specular Intensity
  
-        // PER-FRAGMENT OBJECT
-        // LIGHT ONE ************************************************************
-        // BLUE LIGHT'S OBJECT SPACE INTENSITY
-        vDifIntensity1_obj = calcDifIntensity(aPosition, pos_view, lightIntensity1,
-         lightCenter1_obj); // The Diffuse Intensity
-        vBlinnSpecIntensity1_obj = calcBlinnIntensity(aPosition, pos_view, lightIntensity1,
-         lightCenter1_obj); // The Blinn Specular Intensity
+    // PER-FRAGMENT OBJECT
+    // LIGHT ONE ************************************************************
+    // BLUE LIGHT'S OBJECT SPACE INTENSITY
+    vDifIntensity1_obj = calcDifIntensity(aPosition, pos_view, lightIntensity1,
+      lightCenter1_obj); // The Diffuse Intensity
+    vBlinnSpecIntensity1_obj = calcBlinnIntensity(aPosition, pos_view, lightIntensity1,
+      lightCenter1_obj); // The Blinn Specular Intensity
  
-        // LIGHT TWO ************************************************************
-        // RED LIGHT'S OBJECT SPACE INTENSITY
-        vDifIntensity2_obj = calcDifIntensity(aPosition, pos_view, lightIntensity2,
-         lightCenter2_obj); // The Diffuse Intensity
-        vBlinnSpecIntensity2_obj = calcBlinnIntensity(aPosition, pos_view, lightIntensity2,
-         lightCenter2_obj); // The Blinn Specular Intensity
+    // LIGHT TWO ************************************************************
+    // RED LIGHT'S OBJECT SPACE INTENSITY
+    vDifIntensity2_obj = calcDifIntensity(aPosition, pos_view, lightIntensity2,
+      lightCenter2_obj); // The Diffuse Intensity
+    vBlinnSpecIntensity2_obj = calcBlinnIntensity(aPosition, pos_view, lightIntensity2,
+      lightCenter2_obj); // The Blinn Specular Intensity
  	
  	// LIGHT THREE ************************************************************
-        // GREEN LIGHT'S OBJECT SPACE INTENSITY
-        vDifIntensity3_obj = calcDifIntensity(aPosition, pos_view, lightIntensity3,
-         lightCenter3_obj); // The Diffuse Intensity
-        vBlinnSpecIntensity3_obj = calcBlinnIntensity(aPosition, pos_view, lightIntensity3,
-         lightCenter3_obj); // The Blinn Specular Intensity
+    // GREEN LIGHT'S OBJECT SPACE INTENSITY
+    vDifIntensity3_obj = calcDifIntensity(aPosition, pos_view, lightIntensity3,
+      lightCenter3_obj); // The Diffuse Intensity
+    vBlinnSpecIntensity3_obj = calcBlinnIntensity(aPosition, pos_view, lightIntensity3,
+      lightCenter3_obj); // The Blinn Specular Intensity
  
 	// VIEW SPACE IMAGE
 	///*
 	//vColor =  pokeball;
-	vColor += mix(light1_view, light2_view, light3_view);
+	//vColor += mix(light1_view, light2_view, light3_view);
 	//*/
 	
 	// OBJECT SPACE IMAGE
 	/*
 	vColor = beastball;
-	vColor += mix(light1_obj, light2_obj, light3_obj);
+	vColor += light1_obj + light2_obj + light3_obj;
 	*/
 }
 
