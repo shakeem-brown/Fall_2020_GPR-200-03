@@ -31,17 +31,50 @@ uniform sampler2D uTextureTwo;
 uniform sampler2D uTextureThree;
 uniform sampler2D uTextureFour;
 
-// VARYING
+// VARYINGS
 
 // PER-VERTEX: pass final color
 out vec4 vColor;
 
-// PER-FRAGMENT: pass requirements
-out vec4 vNormal;
-
-//out vec2 vTexcoord;
-//out vec4 vTexcoord;
-
+// LIGHT VARYINGS
+out vec3 vLightPos;
+out float vDifCoefficient;
+out vec3 vLightDis;
+out vec3 vAttenuation;
+out vec3 vDifIntensity;
+out vec3 vViewVec;
+out vec3 vRefLightVec;
+out float vSpecCoefficient;
+out float vHighExpo;
+out float vSpecIntensity;
+out vec3 vHalf_vector;
+out float vBlinnCoefficient;
+out float vBlinnHighExpo;
+out float vBlinnSpecIntesnity;
+out vec4 textureView;
+out vec4 textureObj;
+   
+void calcLightVaryings(vec3 appliedColor, vec4 mPos,
+ vec4 vPos, float intensity, vec3 lightCenter, vec4 baseLightColor)
+ {
+ 	vLightPos = normalize(lightCenter - mPos.xyz);
+	vDifCoefficient = max(0.0, dot(aNormal, vLightPos));
+	vLightDis = vec3(lightCenter - 1.0); 
+	vAttenuation = 1.0 / (1.0 + (vLightDis / intensity)
+	 + (vLightDis * vLightDis) / (intensity * intensity));
+    vDifIntensity = vec3(vDifCoefficient * vAttenuation); 
+        
+   vViewVec = normalize(vPos.xyz - mPos.xyz);
+   vRefLightVec = reflect(-(vLightPos), aNormal); 
+   vSpecCoefficient = max(0.0, dot(vViewVec, vRefLightVec));
+   vHighExpo = 8.0; // 2.0^3.0 simplified
+   vSpecIntensity = pow(vSpecCoefficient, vHighExpo);
+   
+   vHalf_vector = normalize(vLightPos + vViewVec); // calculates half the vector
+   vBlinnCoefficient = dot(aNormal, vHalf_vector); // calculates the blinn Coefficient
+   vBlinnHighExpo = (4.0 * vHighExpo); // calculates the blinn coefficient
+   vBlinnSpecIntesnity = pow(vBlinnCoefficient, vBlinnHighExpo); 
+ }
 
 vec3 calcBlinnPhong(vec3 appliedColor, vec4 mPos,
  vec4 vPos, float intensity, vec3 lightCenter, vec4 baseLightColor)
@@ -70,23 +103,6 @@ vec3 calcBlinnPhong(vec3 appliedColor, vec4 mPos,
 
 void main()
 {
-	//Require: write to this variable:
-	// problem: gl_Position is in "clip-space"
-	// problem: aPosition is in "object-space"
-	//gl_Position = aPosition;
-	
-	// position in world (not yet right)
-	// vec4 pos_view = uViewMat * pos_world;
-	// gl_Position = pos_world;
-	
-	// position in camera space (still not right)
-	//vec4 pos_view = uViewMat * pos_world;
-	//vec4 pos_view = uViewMat * uModelMat * aPosition;
-	//gl_Position = pos_view;
-	
-	// position in clip space (hooray)
-	//vec4 pos_clip = uViewProjMat * pos_world;
-	//vec4 pos_clip = uProjMat * uViewMat * uModelMat * aPosition;
 	
 	// POSITION PIPELINE
 	mat4 modelViewMat = uViewMat * uModelMat;
@@ -94,18 +110,6 @@ void main()
 	vec4 pos_clip = uProjMat * pos_view;
 	gl_Position = pos_clip;
 	
-	//NORMAL PIPELINE
-	mat3 normalMat = inverse(transpose(mat3(modelViewMat)));
-	vec3 nrm_view = normalMat * aNormal;
-	
-	// TEXCOORD PIPELINE
-	// (1, 1) & (2, 2) are the scalers
-	// (4, 1) & (4, 2) are the transformations
-	mat4 atlasMat = mat4(0.5, 0.0, 0.0, 0.0,
-						 0.0, 0.5, 0.0, 0.0,
-						 0.0, 0.0, 1.0, 0.0,
-						 0.25, 0.25, 0.0, 1.0);
-	vec4 uv_atlas = atlasMat * aTexcoord;
 	
 	vec4 pokeball = texture(uTextureOne, aTexcoord.xy);
 	vec4 beastball = texture(uTextureTwo, aTexcoord.xy);
@@ -113,18 +117,21 @@ void main()
 	vec4 premierball = texture(uTextureFour, aTexcoord.xy);
 	
 	// LIGHT PIPELINE
+	mat3 lightViewMat = mat3(uViewMat);
+	mat3 lightObjMat = mat3(inverse(uModelMat));
 	// LIGHT ONE
 	vec3 blue = vec3(0.0, 0.0, 1.0); // The applied Light color
 	float lightIntensity1 = 0.7;
 	
 	// CENTERS
 	vec3 lightCenter1 = vec3(0.0, 10.0, -4.0);// change later
-	vec3 lightCenter1_view = lightCenter1 * mat3(uViewMat);
+	vec3 lightCenter1_view = lightCenter1 * lightViewMat;
+	vec3 lightCenter1_obj = lightCenter1 * lightObjMat;
 	
-	vec4 light1 = vec4(calcBlinnPhong(blue, aPosition, pos_view,
-	 lightIntensity1, lightCenter1, pokeball), 1.0);
 	vec4 light1_view = vec4(calcBlinnPhong(blue, aPosition, pos_view,
 	 lightIntensity1, lightCenter1_view, pokeball), 1.0);
+	 vec4 light1_obj = vec4(calcBlinnPhong(blue, aPosition, pos_view,
+	 lightIntensity1, lightCenter1_obj, beastball), 1.0);
 	 
 	 // LIGHT TWO
 	vec3 red = vec3(1.0, 0.0, 0.0); // The applied Light color
@@ -132,12 +139,13 @@ void main()
      
      // CENTERS
 	vec3 lightCenter2 = vec3(1000.0, 0.0, -4.0);// change later
-	 vec3 lightCenter2_view = lightCenter2 * mat3(uViewMat);
+    vec3 lightCenter2_view = lightCenter2 * lightViewMat;
+	vec3 lightCenter2_obj = lightCenter2 * lightObjMat;
 
-	vec4 light2 = vec4(calcBlinnPhong(red, aPosition, pos_view,
-	 lightIntensity2, lightCenter2, pokeball), 1.0);
 	vec4 light2_view = vec4(calcBlinnPhong(red, aPosition, pos_view,
 	 lightIntensity2, lightCenter2_view, pokeball), 1.0);
+	 vec4 light2_obj = vec4(calcBlinnPhong(red, aPosition, pos_view,
+	 lightIntensity2, lightCenter2_obj, beastball), 1.0);
 	 
 	 // LIGHT THREE
 	vec3 green = vec3(0.0, 1.0, 0.0); // The applied Light color
@@ -145,39 +153,42 @@ void main()
      
      // CENTERS
 	vec3 lightCenter3 = vec3(100.0, 0.0, -4.0);// change later
-	vec3 lightCenter3_view = lightCenter3 * mat3(uViewMat);
+		vec3 lightCenter3_view = lightCenter3 * lightViewMat;
+	vec3 lightCenter3_obj = lightCenter3 * lightObjMat;
 
-	vec4 light3 = vec4(calcBlinnPhong(green, aPosition, pos_view,
-	 lightIntensity3, lightCenter3, pokeball), 1.0);
 	vec4 light3_view = vec4(calcBlinnPhong(green, aPosition, pos_view,
 	 lightIntensity3, lightCenter3_view, pokeball), 1.0);
+	 vec4 light3_obj = vec4(calcBlinnPhong(green, aPosition, pos_view,
+	 lightIntensity3, lightCenter3_obj, beastball), 1.0);
 	
-	//  OPTIONAL: pass varyings
-	//vColor = vec4(1.0, 0.5, 0.0, 1.0);
-	//vColor = pos_view;
-	
-	// DEBUGGING
-	
-	// PER-VERTEX: output is final color
-	//vColor = aPosition;
-	// example: output normal as if it is color
-	//vColor = vec4(aNormal * 0.5 + 0.5, 1.0);
-	
-	
-	// PER-FRAGMENT: output data needed for FS to calc final
-	//vNormal = vec4(aNormal, 0.0);
-	vNormal = vec4(nrm_view, 0.0);
-	
-	// World Space Image
-	//vColor = mix(light1, light2, light3) + pokeball;
-	
+    calcLightVaryings(blue, aPosition,
+     pos_view, lightIntensity1, lightCenter1_view, safariball);
+     
+     calcLightVaryings(red, aPosition,
+     pos_view, lightIntensity2, lightCenter2_view, safariball);
+     
+     calcLightVaryings(green, aPosition,
+     pos_view, lightIntensity3, lightCenter3_view, safariball);
+     
+     calcLightVaryings(blue, aPosition,
+     pos_view, lightIntensity1, lightCenter1_obj, premierball);
+     
+     calcLightVaryings(red, aPosition,
+     pos_view, lightIntensity2, lightCenter2_obj, premierball);
+     
+     calcLightVaryings(green, aPosition,
+     pos_view, lightIntensity3, lightCenter3_obj, premierball);
+ 
+ 
 	// View Space Image
-	vColor = mix(light1_view, light2_view, light3_view) + beastball;
+	//vColor =  pokeball;
+	//vColor += mix(light1_view, light2_view, light3_view);
+	
+	// Object Space Image
+	vColor = beastball;
+	vColor += mix(light1_obj, light2_obj, light3_obj);
 	
 	
-	//vTexcoord = aTexcoord;
-	
-	//gl_Position = uProjMat * modelViewMat * aTexcoord;
 }
 
 
