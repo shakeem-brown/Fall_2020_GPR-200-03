@@ -37,8 +37,18 @@ uniform sampler2D uTextureFour;
 out vec4 vColor;
 
 // LIGHT VARYINGS
-out vec3 vDifIntensity;
-out float vBlinnSpecIntensity;
+out vec3 vDifIntensity1_view;
+out float vBlinnSpecIntensity1_view;
+out vec3 vDifIntensity2_view;
+out float vBlinnSpecIntensity2_view;
+out vec3 vDifIntensity3_view;
+out float vBlinnSpecIntensity3_view;
+out vec3 vDifIntensity1_obj;
+out float vBlinnSpecIntensity1_obj;
+out vec3 vDifIntensity2_obj;
+out float vBlinnSpecIntensity2_obj;
+out vec3 vDifIntensity3_obj;
+out float vBlinnSpecIntensity3_obj;
 out vec4 textureView;
 out vec4 textureObj;
    
@@ -164,12 +174,37 @@ void main()
 	 lightIntensity3, lightCenter3_obj, beastball), 1.0);
 	
      
-     vec3 vDifIntensity = calcDifIntensity(aPosition, pos_view, lightIntensity1,
+     // PER-FRAGMENT VIEW
+     vDifIntensity1_view = calcDifIntensity(aPosition, pos_view, lightIntensity1,
       lightCenter1_view);
-
-    float vBlinnSpecIntensity =  calcBlinnIntensity(aPosition, pos_view, lightIntensity1,
+    vBlinnSpecIntensity1_view =  calcBlinnIntensity(aPosition, pos_view, lightIntensity1,
       lightCenter1_view);
  
+ 	vDifIntensity2_view = calcDifIntensity(aPosition, pos_view, lightIntensity2,
+      lightCenter2_view);
+ vBlinnSpecIntensity2_view = calcBlinnIntensity(aPosition, pos_view, lightIntensity2,
+      lightCenter2_view);
+ 
+ vDifIntensity3_view = calcDifIntensity(aPosition, pos_view, lightIntensity3,
+      lightCenter3_view);
+ vBlinnSpecIntensity3_view = calcBlinnIntensity(aPosition, pos_view, lightIntensity3,
+      lightCenter3_view);
+ 
+ // PER-FRAGMENT OBJECT
+ vDifIntensity1_obj = calcDifIntensity(aPosition, pos_view, lightIntensity1,
+      lightCenter1_obj);
+ vBlinnSpecIntensity1_obj = calcBlinnIntensity(aPosition, pos_view, lightIntensity1,
+      lightCenter1_obj);
+ 
+ vDifIntensity2_obj = calcDifIntensity(aPosition, pos_view, lightIntensity2,
+      lightCenter2_obj);
+ vBlinnSpecIntensity2_obj = calcBlinnIntensity(aPosition, pos_view, lightIntensity2,
+      lightCenter2_obj);
+ 
+ vDifIntensity3_obj = calcDifIntensity(aPosition, pos_view, lightIntensity3,
+      lightCenter3_obj);
+ vBlinnSpecIntensity3_obj = calcBlinnIntensity(aPosition, pos_view, lightIntensity3,
+      lightCenter3_obj);
  
 	// View Space Image
 	/*
