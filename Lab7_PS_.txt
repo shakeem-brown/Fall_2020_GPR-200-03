@@ -2,6 +2,7 @@
 //#version 450
 
 /*
+	Title: Lab 7 Vertex Shaders and Transformations
 	Instructor Name: Daniel Buckstein
 	Authors: Andrew Barnett & Shakeem Brown
 */
@@ -35,35 +36,49 @@ in vec4 textureObj;
 
 void main()
 {
-	//PER-VERTEX: just displays the final color from VS
-	rtFragColor = vColor;
+   //PER-VERTEX: just displays the final color from VS
+   rtFragColor = vColor;
 	
-	// PER-FRAGMENT VIEW SPACE
-	vec4 blinn_phong_color1_view =  vec4((((vDifIntensity1_view * textureView.xyz) 
-   + (vBlinnSpecIntensity1_view * vec3(0.0, 0.0, 1.0))) * textureView.xyz), 1.0);
+   // PER-FRAGMENT VIEW SPACE
+   // LIGHT ONE ************************************************************
+   vec4 blinn_phong_color1_view =  vec4((((vDifIntensity1_view * textureView.xyz) 
+     + (vBlinnSpecIntensity1_view * vec3(0.0, 0.0, 1.0))) * textureView.xyz), 1.0);
+     
+   // LIGHT TWO ************************************************************
    vec4 blinn_phong_color2_view =  vec4((((vDifIntensity2_view * textureView.xyz) 
-   + (vBlinnSpecIntensity2_view * vec3(1.0, 0.0, 0.0))) * textureView.xyz), 1.0);
+     + (vBlinnSpecIntensity2_view * vec3(1.0, 0.0, 0.0))) * textureView.xyz), 1.0);
+     
+   // LIGHT THREE ************************************************************
    vec4 blinn_phong_color3_view =  vec4((((vDifIntensity3_view * textureView.xyz) 
-   + (vBlinnSpecIntensity3_view * vec3(0.0, 1.0, 0.0))) * textureView.xyz), 1.0);
+     + (vBlinnSpecIntensity3_view * vec3(0.0, 1.0, 0.0))) * textureView.xyz), 1.0);
    
-   //rtFragColor = textureView;
-   //rtFragColor += mix(blinn_phong_color1_view, blinn_phong_color2_view,
-   // blinn_phong_color3_view);
+   // Displays the light's in view space with a safariball texture
+   /*
+   rtFragColor = textureView;
+   rtFragColor += mix(blinn_phong_color1_view, blinn_phong_color2_view,
+    blinn_phong_color3_view);
+   */
     
    
    // PER-FRAGMENT OBJECT SPACE
-	vec4 blinn_phong_color1_obj = vec4((((vDifIntensity1_obj * textureObj.xyz) 
-   + (vBlinnSpecIntensity1_obj * vec3(0.0, 0.0, 1.0))) * textureObj.xyz), 1.0);
+   // LIGHT ONE ************************************************************
+   vec4 blinn_phong_color1_obj = vec4((((vDifIntensity1_obj * textureObj.xyz) 
+     + (vBlinnSpecIntensity1_obj * vec3(0.0, 0.0, 1.0))) * textureObj.xyz), 1.0);
+   
+   // LIGHT TWO ************************************************************
    vec4 blinn_phong_color2_obj =  vec4((((vDifIntensity2_obj * textureObj.xyz) 
-   + (vBlinnSpecIntensity2_obj * vec3(1.0, 0.0, 0.0))) * textureObj.xyz), 1.0);
+     + (vBlinnSpecIntensity2_obj * vec3(1.0, 0.0, 0.0))) * textureObj.xyz), 1.0);
+   
+   // LIGHT THREE ************************************************************
    vec4 blinn_phong_color3_obj =  vec4((((vDifIntensity3_obj * textureObj.xyz) 
-   + (vBlinnSpecIntensity3_obj * vec3(0.0, 1.0, 0.0))) * textureObj.xyz), 1.0);
+     + (vBlinnSpecIntensity3_obj * vec3(0.0, 1.0, 0.0))) * textureObj.xyz), 1.0);
 
-	///*
-   //rtFragColor = textureObj;
+   // Displays the light's in object space with a premierball texture
+   /*
+   rtFragColor = textureObj;
    rtFragColor += mix(blinn_phong_color1_obj, blinn_phong_color2_obj,
     blinn_phong_color3_obj);
-   // */
+   */
 }
 
 
