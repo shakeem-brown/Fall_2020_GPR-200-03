@@ -108,32 +108,49 @@ void main()
 	vec4 uv_atlas = atlasMat * aTexcoord;
 	
 	vec4 pokeball = texture(uTextureOne, aTexcoord.xy);
-	vec4 dreamball = texture(uTextureTwo, aTexcoord.xy);
-	vec4 beastball = texture(uTextureThree, aTexcoord.xy);
-	vec4 safariball = texture(uTextureFour, aTexcoord.xy);
-	
+	vec4 beastball = texture(uTextureTwo, aTexcoord.xy);
+	vec4 safariball = texture(uTextureThree, aTexcoord.xy);
+	vec4 premierball = texture(uTextureFour, aTexcoord.xy);
 	
 	// LIGHT PIPELINE
 	// LIGHT ONE
 	vec3 blue = vec3(0.0, 0.0, 1.0); // The applied Light color
-	vec3 lightCenter1 = vec3(0.0, 10.0, -4.0);// change later
 	float lightIntensity1 = 0.7;
+	
+	// CENTERS
+	vec3 lightCenter1 = vec3(0.0, 10.0, -4.0);// change later
+	vec3 lightCenter1_view = lightCenter1 * mat3(uViewMat);
+	
 	vec4 light1 = vec4(calcBlinnPhong(blue, aPosition, pos_view,
 	 lightIntensity1, lightCenter1, pokeball), 1.0);
+	vec4 light1_view = vec4(calcBlinnPhong(blue, aPosition, pos_view,
+	 lightIntensity1, lightCenter1_view, pokeball), 1.0);
 	 
 	 // LIGHT TWO
-	 vec3 red = vec3(1.0, 0.0, 0.0); // The applied Light color
-	 vec3 lightCenter2 = vec3(1000.0, 0.0, -4.0);// change later
-	 float lightIntensity2 = 1.0;
-	 vec4 light2 = vec4(calcBlinnPhong(red, aPosition, pos_view,
+	vec3 red = vec3(1.0, 0.0, 0.0); // The applied Light color
+    float lightIntensity2 = 1.0;
+     
+     // CENTERS
+	vec3 lightCenter2 = vec3(1000.0, 0.0, -4.0);// change later
+	 vec3 lightCenter2_view = lightCenter2 * mat3(uViewMat);
+
+	vec4 light2 = vec4(calcBlinnPhong(red, aPosition, pos_view,
 	 lightIntensity2, lightCenter2, pokeball), 1.0);
+	vec4 light2_view = vec4(calcBlinnPhong(red, aPosition, pos_view,
+	 lightIntensity2, lightCenter2_view, pokeball), 1.0);
 	 
 	 // LIGHT THREE
-	 vec3 green = vec3(0.0, 1.0, 0.0); // The applied Light color
-	 vec3 lightCenter3 = vec3(100.0, 0.0, -4.0);// change later
-	 float lightIntensity3 = 0.8;
-	 vec4 light3 = vec4(calcBlinnPhong(green, aPosition, pos_view,
+	vec3 green = vec3(0.0, 1.0, 0.0); // The applied Light color
+    float lightIntensity3 = 0.8;
+     
+     // CENTERS
+	vec3 lightCenter3 = vec3(100.0, 0.0, -4.0);// change later
+	vec3 lightCenter3_view = lightCenter3 * mat3(uViewMat);
+
+	vec4 light3 = vec4(calcBlinnPhong(green, aPosition, pos_view,
 	 lightIntensity3, lightCenter3, pokeball), 1.0);
+	vec4 light3_view = vec4(calcBlinnPhong(green, aPosition, pos_view,
+	 lightIntensity3, lightCenter3_view, pokeball), 1.0);
 	
 	//  OPTIONAL: pass varyings
 	//vColor = vec4(1.0, 0.5, 0.0, 1.0);
@@ -150,8 +167,12 @@ void main()
 	// PER-FRAGMENT: output data needed for FS to calc final
 	//vNormal = vec4(aNormal, 0.0);
 	vNormal = vec4(nrm_view, 0.0);
-	//vColor = pokeball;
-	vColor = mix(light1, light2, light3) + pokeball;
+	
+	// World Space Image
+	//vColor = mix(light1, light2, light3) + pokeball;
+	
+	// View Space Image
+	vColor = mix(light1_view, light2_view, light3_view) + beastball;
 	
 	
 	//vTexcoord = aTexcoord;
