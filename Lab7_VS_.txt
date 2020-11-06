@@ -43,6 +43,31 @@ out vec4 vNormal;
 //out vec4 vTexcoord;
 
 
+vec3 calcBlinnPhong(vec3 appliedColor, vec4 mPos,
+ vec4 vPos, float intensity, vec3 lightCenter, vec4 baseLightColor)
+ {
+ 	vec3 lightPos = normalize(lightCenter - aPosition.xyz);
+	float difCoefficient = max(0.0, dot(aNormal, lightPos));
+	vec3 lightDis = vec3(lightCenter - 1.0); 
+	vec3 attenuation = 1.0 / (1.0 + (lightDis / intensity)
+	 + (lightDis * lightDis) / (intensity * intensity));
+    vec3 difIntensity = vec3(difCoefficient * attenuation); 
+        
+   vec3 viewVec = normalize(vPos.xyz - mPos.xyz);
+   vec3 refLightVec = reflect(-(lightPos), aNormal); 
+   float specCoefficient = max(0.0, dot(viewVec, refLightVec));
+   float highExpo = 8.0; // 2.0^3.0 simplified
+   float specIntensity = pow(specCoefficient, highExpo);
+   
+   vec3 half_vector = normalize(lightPos + viewVec); // calculates half the vector
+   float blinnCoefficient = dot(aNormal, half_vector); // calculates the blinn Coefficient
+   float blinnHighExpo = (4.0 * highExpo); // calculates the blinn coefficient
+   float blinnSpecIntesnity = pow(blinnCoefficient, blinnHighExpo); // calculaute the blinn specular intensity
+   vec3 blinn_phong_color =  vec3(((difIntensity * baseLightColor.xyz) 
+   + (blinnSpecIntesnity * appliedColor)) * baseLightColor.xyz);
+   return blinn_phong_color;
+ }
+
 void main()
 {
 	//Require: write to this variable:
@@ -82,33 +107,33 @@ void main()
 						 0.25, 0.25, 0.0, 1.0);
 	vec4 uv_atlas = atlasMat * aTexcoord;
 	
+	vec4 pokeball = texture(uTextureOne, aTexcoord.xy);
+	vec4 dreamball = texture(uTextureTwo, aTexcoord.xy);
+	vec4 beastball = texture(uTextureThree, aTexcoord.xy);
+	vec4 safariball = texture(uTextureFour, aTexcoord.xy);
+	
+	
 	// LIGHT PIPELINE
-	vec3 appliedLightColor = vec3(0.0, 0.0, 1.0); // The applied Light color
-	vec3 baseLightColor = vec3(1.0); // White light
-	vec3 lightCenter = vec3(0.0);// change later
-	float lightIntensity = 1.0;
-	
-	
-	vec3 lightPos = normalize(lightCenter - aPosition.xyz);
-	float difCoefficient = max(0.0, dot(aNormal, lightPos));
-	vec3 lightDis = vec3(lightCenter - 1.0); 
-	vec3 attenuation = 1.0 / (1.0 + (lightDis / lightIntensity)
-	 + (lightDis * lightDis) / (lightIntensity * lightIntensity));
-    vec3 difIntensity = vec3(difCoefficient * attenuation); 
-        
-   vec3 viewVec = normalize(pos_view.xyz - aPosition.xyz);
-   vec3 refLightVec = reflect(-(lightPos), aNormal); 
-   float specCoefficient = max(0.0, dot(viewVec, refLightVec));
-   float highExpo = 8.0; // 2.0^3.0 simplified
-   float specIntensity = pow(specCoefficient, highExpo);
-   
-   vec3 half_vector = normalize(lightPos + viewVec); // calculates half the vector
-   float blinnCoefficient = dot(aNormal, half_vector); // calculates the blinn Coefficient
-   float blinnHighExpo = (4.0 * highExpo); // calculates the blinn coefficient
-   float blinnSpecIntesnity = pow(blinnCoefficient, blinnHighExpo); // calculaute the blinn specular intensity
-   vec3 blinn_phong_color =  vec3(((difIntensity * baseLightColor) 
-   + (blinnSpecIntesnity * appliedLightColor)) * baseLightColor);
-	
+	// LIGHT ONE
+	vec3 blue = vec3(0.0, 0.0, 1.0); // The applied Light color
+	vec3 lightCenter1 = vec3(0.0, 10.0, -4.0);// change later
+	float lightIntensity1 = 0.7;
+	vec4 light1 = vec4(calcBlinnPhong(blue, aPosition, pos_view,
+	 lightIntensity1, lightCenter1, pokeball), 1.0);
+	 
+	 // LIGHT TWO
+	 vec3 red = vec3(1.0, 0.0, 0.0); // The applied Light color
+	 vec3 lightCenter2 = vec3(1000.0, 0.0, -4.0);// change later
+	 float lightIntensity2 = 1.0;
+	 vec4 light2 = vec4(calcBlinnPhong(red, aPosition, pos_view,
+	 lightIntensity2, lightCenter2, pokeball), 1.0);
+	 
+	 // LIGHT THREE
+	 vec3 green = vec3(0.0, 1.0, 0.0); // The applied Light color
+	 vec3 lightCenter3 = vec3(100.0, 0.0, -4.0);// change later
+	 float lightIntensity3 = 0.8;
+	 vec4 light3 = vec4(calcBlinnPhong(green, aPosition, pos_view,
+	 lightIntensity3, lightCenter3, pokeball), 1.0);
 	
 	//  OPTIONAL: pass varyings
 	//vColor = vec4(1.0, 0.5, 0.0, 1.0);
@@ -125,8 +150,8 @@ void main()
 	// PER-FRAGMENT: output data needed for FS to calc final
 	//vNormal = vec4(aNormal, 0.0);
 	vNormal = vec4(nrm_view, 0.0);
-	vColor = texture(uTextureOne, aTexcoord.xy);
-	vColor += vec4(blinn_phong_color, 1.0);
+	//vColor = pokeball;
+	vColor = mix(light1, light2, light3) + pokeball;
 	
 	
 	//vTexcoord = aTexcoord;
