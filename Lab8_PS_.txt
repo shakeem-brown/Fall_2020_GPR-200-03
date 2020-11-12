@@ -12,6 +12,7 @@ precision highp float;
 #endif // GL_ES
 
 layout (location = 0) out vec4 rtFragColor;
+//layout (location = 1) out vec4 pFragColor;
 
 in vec4 vPosClip;
 
@@ -29,5 +30,6 @@ void main()
 	
 	//TEST: remove blue to see RGY gradiant
 	rtFragColor.b = 0.0;
+	//pFragColor = vec4(1.0);
 	
 }
