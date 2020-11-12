@@ -14,18 +14,19 @@ layout(location = 1) in vec3 aNormal;
 // PLANE OBJECT SPACE
 //layout (location = 1) in vec4 pPosition;
 
+// TRANSFORM UNIFORMS
 uniform mat4 uModelMat, uViewMat, uProjMat;
 
+// VARYINGS
 out vec4 vPosClip;
 
 // calcDifIntensity: calculates the diffuse intensity
 //		mPos: the object-space
 //		vPos: the camera-space
-//		intensity: the intensity of the light
 //		lightCenter: the light's center
-vec3 calcDifIntensity(vec4 mPos,
-vec4 vPos, float intensity, vec3 lightCenter)
+vec3 calcDifIntensity(vec4 mPos, vec4 vPos,  vec3 lightCenter)
  {
+    float intensity = 1.0;
  	vec3 lightPos = normalize(lightCenter - aPosition.xyz); // Calculates the light's position
 	float difCoefficient = max(0.0, dot(aNormal, lightPos)); // calculates the diffues coefficent
 	vec3 lightDis = vec3(lightCenter - 1.0);  // calculates the light's distance
@@ -38,12 +39,10 @@ vec4 vPos, float intensity, vec3 lightCenter)
  // calcBlinnIntensity: calculates the Blinn intensity
 //		mPos: the object-space
 //		vPos: the camera-space
-//		intensity: the intensity of the light
 //		lightCenter: the light's center
-float calcBlinnIntensity(vec4 mPos,
- vec4 vPos, vec3 lightCenter)
+float calcBlinnIntensity(vec4 mPos, vec4 vPos, vec3 lightCenter)
 {
-	float intensity = 1.0;
+   float intensity = 1.0;
    vec3 lightPos = normalize(lightCenter - aPosition.xyz); // calculates the light's Position
    vec3 viewVec = normalize(vPos.xyz - mPos.xyz); // calcultes the view vector
    vec3 refLightVec = reflect(-(lightPos), aNormal);  // calculates the reflected light vector
@@ -59,21 +58,15 @@ float calcBlinnIntensity(vec4 mPos,
 }
 
 // calcBlinnPhong: calculates the Blinn Phong lighting in one call
-//		appliedColor: the color of the light
 //		mPos: the object-space
 //		vPos: the camera-space
-//		intensity: the intensity of the light
 //		lightCenter: the light's center
-//		baseLightColor: the texture or the orignial color of the object
 vec3 calcBlinnPhong(vec4 mPos, vec4 vPos, vec3 lightCenter)
  {
  	float intensity = 1.0;
  	vec3 whiteLight = vec3(1.0);
- 	vec3 difIntensity = calcDifIntensity(mPos,
-vPos, intensity, lightCenter); // Calls the diffuse intensity function
-        
-   float blinnSpecIntensity = calcBlinnIntensity(mPos,
- vPos, lightCenter); //Calls the blinn specular intensity function
+ 	vec3 difIntensity = calcDifIntensity(mPos, vPos, lightCenter); // Calls the diffuse intensity function
+   float blinnSpecIntensity = calcBlinnIntensity(mPos, vPos, lightCenter); //Calls the blinn specular intensity function
    
    vec3 blinn_phong_color =  vec3(((difIntensity * whiteLight) 
    + (blinnSpecIntensity * whiteLight)) * whiteLight); // Calculation the blinn phong effect/color
@@ -82,23 +75,23 @@ vPos, intensity, lightCenter); // Calls the diffuse intensity function
 
 void main()
 {
-	vec4 pos_view = uModelMat * aPosition;
-	
-	// SPHERE POSITION PIPELINE
+    // SPHERE POSITION PIPELINE
+    mat4 modelViewMat = uViewMat * uModelMat;
+	vec4 pos_view = modelViewMat * aPosition;
+	vec4 pos_clip = uProjMat * pos_view;
 	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
 	// w = 1 because the point is conditional depending if its orthographic
 	// w = is equal to the distance to  the viewer
 	
-	// LIGHT PIPELINE
-	mat3 lightViewMat = mat3(uViewMat); // View Space matrix
-	
+	// PLANE POSITION PIPELINE
 	//gl_Position = uProjMat * uViewMat * uModelMat * pPosition;
 	
-	// LIGHT CENTER
-	vec3 lightCenter1 = vec3(10.0, 0.0, 10.0); // The light's world's space center
-	vec3 lightCenter1_view = lightCenter1 * lightViewMat; // The light's view space center
-
-	vec4 light1_view = vec4(calcBlinnPhong(aPosition, pos_view, 
-	lightCenter1_view), 1.0); // The light's view space intensity
+	// LIGHT PIPELINE
+	mat3 lightViewMat = mat3(uViewMat); // View Space matrix
+	vec3 lightCenter = vec3(0.0, 0.0, 0.0); // The light's world's space center
+	vec3 lightCenter_view = lightCenter * lightViewMat; // The light's view space center
+	vec4 light_view = vec4(calcBlinnPhong(aPosition, pos_view, 
+	lightCenter_view), 1.0); // The light's view space intensity
+	
 	vPosClip = gl_Position;
 }
