@@ -1,0 +1,23 @@
+#version 300 es
+//#version 450
+
+/*
+	Title: Lab 8 Shader Pipelines
+	Instructor Name: Daniel Buckstein
+	Authors: Andrew Barnett & Shakeem Brown
+*/
+
+layout (location = 0) in vec4 aPosition;
+
+uniform mat4 uModelMat, uViewMat, uProjMat;
+
+out vec4 vPosClip;
+
+void main()
+{
+	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
+	// w = 1 because the point is conditional depending if its orthographic
+	// w = is equal to the distance to  the viewer
+	
+	vPosClip = gl_Position;
+}
