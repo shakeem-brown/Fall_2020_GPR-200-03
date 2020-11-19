@@ -1,0 +1,28 @@
+#version 300 es
+//#version 450
+
+/*
+	Title: Lab 8 Shader Pipelines
+	Instructor Name: Daniel Buckstein
+	Authors: Andrew Barnett & Shakeem Brown
+*/
+
+//  SPHERE OBJECT-SPACE
+layout (location = 0) in vec4 aPosition;
+layout(location = 1) in vec3 aNormal;
+
+// PLANE OBJECT SPACE
+//layout (location = 1) in vec4 pPosition;
+
+// TRANSFORM UNIFORMS
+uniform mat4 uModelMat, uViewMat, uProjMat;
+
+// VARYINGS
+out vec4 vPosClip;
+
+void main()
+{
+	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
+	
+	vPosClip = gl_Position;
+}

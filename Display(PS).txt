@@ -1,0 +1,28 @@
+#version 300 es
+//#version 450
+
+/*
+	Title: Lab 8 Shader Pipelines
+	Instructor Name: Daniel Buckstein
+	Authors: Andrew Barnett & Shakeem Brown
+*/
+
+#ifdef GL_ES
+precision highp float;
+#endif // GL_ES
+
+uniform sampler2D uTex;
+uniform vec2 uResolution;
+
+// VARYINGS
+in vec2 vTexcoord;
+
+layout (location = 0) out vec4 rtFragColor;
+
+void main()
+{
+	vec2 uv = vTexcoord / uResolution;
+	vec4 color = texture(uTex, uv);
+	
+	rtFragColor = color;
+}

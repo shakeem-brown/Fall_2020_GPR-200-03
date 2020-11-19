@@ -9,10 +9,7 @@
 
 //  SPHERE OBJECT-SPACE
 layout (location = 0) in vec4 aPosition;
-layout(location = 1) in vec3 aNormal;
-
-// PLANE OBJECT SPACE
-//layout (location = 1) in vec4 pPosition;
+layout (location = 1) in vec3 aNormal;
 
 // TRANSFORM UNIFORMS
 uniform mat4 uModelMat, uViewMat, uProjMat;
@@ -80,11 +77,6 @@ void main()
 	vec4 pos_view = modelViewMat * aPosition;
 	vec4 pos_clip = uProjMat * pos_view;
 	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
-	// w = 1 because the point is conditional depending if its orthographic
-	// w = is equal to the distance to  the viewer
-	
-	// PLANE POSITION PIPELINE
-	//gl_Position = uProjMat * uViewMat * uModelMat * pPosition;
 	
 	// LIGHT PIPELINE
 	mat3 lightViewMat = mat3(uViewMat); // View Space matrix
@@ -95,3 +87,4 @@ void main()
 	
 	vPosClip = gl_Position;
 }
+
