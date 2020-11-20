@@ -13,10 +13,79 @@ precision highp float;
 
 layout (location = 0) out vec4 rtFragColor;
 
+// VARYINGS
 in vec4 vPosClip;
+in vec4 objPos;
+in vec4 norm;
+
+// UNIFORMS
+uniform vec3 objColor;
+uniform float objShininess;
+uniform vec3 viewPosition;
+uniform vec3 lightPos;
+uniform vec3 lightAmbient;
+uniform vec3 lightDiffuse;
+uniform vec3 lightSpecular;
+uniform vec3 geoColor;
+
+// calcDifIntensity: calculates the diffuse intensity
+//		mPos: the object-space
+//		vPos: the camera-space
+//		lightCenter: the light's center
+vec3 calcDifIntensity(vec4 mPos, vec4 vPos,  vec3 lightCenter)
+ {
+    float intensity = 1.0;
+ 	vec3 lightPos = normalize(lightCenter - objPos.xyz); // Calculates the light's position
+	float difCoefficient = max(0.0, dot(norm.xyz, lightPos)); // calculates the diffues coefficent
+	vec3 lightDis = vec3(lightCenter - 1.0);  // calculates the light's distance
+	vec3 attenuation = 1.0 / (1.0 + (lightDis / intensity)
+	 + (lightDis * lightDis) / (intensity * intensity)); // calculates the attenuation
+    vec3 difIntensity = vec3(difCoefficient * attenuation);  // calculates the diffuse intensity
+    return difIntensity; // returns the diffuse intnesity
+ }
+ 
+ // calcBlinnIntensity: calculates the Blinn intensity
+//		mPos: the object-space
+//		vPos: the camera-space
+//		lightCenter: the light's center
+float calcBlinnIntensity(vec4 mPos, vec4 vPos, vec3 lightCenter)
+{
+   float intensity = 1.0;
+   vec3 lightPos = normalize(lightCenter - objPos.xyz); // calculates the light's Position
+   vec3 viewVec = normalize(vPos.xyz - mPos.xyz); // calcultes the view vector
+   vec3 refLightVec = reflect(-(lightPos), norm.xyz);  // calculates the reflected light vector
+   float specCoefficient = max(0.0, dot(viewVec, refLightVec)); // calculates the specular coefficent
+   float highExpo = 8.0; // 2.0^3.0 simplified
+   float specIntensity = pow(specCoefficient, highExpo); // calculates the specular intensity
+   
+   vec3 half_vector = normalize(lightPos + viewVec); // calculates half the vector
+   float blinnCoefficient = dot(norm.xyz, half_vector); // calculates the blinn Coefficient
+   float blinnHighExpo = (4.0 * highExpo); // calculates the blinn coefficient
+   float blinnSpecIntensity = pow(blinnCoefficient, blinnHighExpo); // calculates the blinn specular intensity
+   return blinnSpecIntensity; // returns the blinn specular intensity
+}
+
+// calcBlinnPhong: calculates the Blinn Phong lighting in one call
+//		mPos: the object-space
+//		vPos: the camera-space
+//		lightCenter: the light's center
+vec3 calcBlinnPhong(vec4 mPos, vec4 vPos, vec3 lightCenter)
+ {
+ 	float intensity = 1.0;
+ 	vec3 whiteLight = vec3(1.0);
+ 	vec3 difIntensity = calcDifIntensity(mPos, vPos, lightCenter); // Calls the diffuse intensity function
+   float blinnSpecIntensity = calcBlinnIntensity(mPos, vPos, lightCenter); //Calls the blinn specular intensity function
+   
+   vec3 blinn_phong_color =  vec3(((difIntensity * whiteLight) 
+   + (blinnSpecIntensity * whiteLight)) * whiteLight); // Calculation the blinn phong effect/color
+   return blinn_phong_color; // Returns the blinn phong effect/color
+ }
 
 void main()
 {
+    // Making sure every obj has a different hue
+    rtFragColor = vec4(geoColor, 1.0);
+    
 	// MANUAL PERSEPECTIVE DIVIDE
 	vec4 posNDC = vPosClip / vPosClip.w;
 	//rtFragColor = posNDC;
@@ -24,11 +93,10 @@ void main()
 	
 	// SCREEN-SPACE
 	vec4 posScreen = posNDC * 0.5 + 0.5;
-	rtFragColor = posScreen;
+	rtFragColor *= posScreen;
 	// [-1, +1] -> [0, 1]
 	
 	//TEST: remove blue to see RGY gradiant
-	rtFragColor.b = 0.0;
-	//pFragColor = vec4(1.0);
+	//rtFragColor.b = 0.0;
 	
 }

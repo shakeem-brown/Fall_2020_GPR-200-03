@@ -17,17 +17,5 @@ in vec4 vPosClip;
 
 void main()
 {
-	// MANUAL PERSEPECTIVE DIVIDE
-	vec4 posNDC = vPosClip / vPosClip.w;
-	//rtFragColor = posNDC;
-	// [-1, +1] -> [0, 1]
-	
-	// SCREEN-SPACE
-	vec4 posScreen = posNDC * 0.5 + 0.5;
-	rtFragColor = posScreen;
-	// [-1, +1] -> [0, 1]
-	
-	//TEST: remove blue to see RGY gradiant
-	rtFragColor.b = 0.0;
-	
+    rtFragColor = vec4(1.0);
 }

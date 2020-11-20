@@ -7,12 +7,9 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-//  SPHERE OBJECT-SPACE
-layout (location = 0) in vec4 aPosition;
+//  OBJECT-SPACE
+layout (location = 0) in vec4 aPositionS;
 layout(location = 1) in vec3 aNormal;
-
-// PLANE OBJECT SPACE
-//layout (location = 1) in vec4 pPosition;
 
 // TRANSFORM UNIFORMS
 uniform mat4 uModelMat, uViewMat, uProjMat;
@@ -22,7 +19,10 @@ out vec4 vPosClip;
 
 void main()
 {
-	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
+    // OBJECT POSITION PIPELINE
+    mat4 modelViewMat = uViewMat * uModelMat;
+	vec4 pos_view = modelViewMat * aPositionS;
+	gl_Position = uProjMat * uViewMat * uModelMat * aPositionS;
 	
 	vPosClip = gl_Position;
 }
