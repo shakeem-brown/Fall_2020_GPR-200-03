@@ -19,6 +19,7 @@ in vec4 objPos;
 in vec4 norm;
 
 // UNIFORMS
+uniform mat4 uViewMat, uPerMat;
 uniform vec3 objColor;
 uniform float objShininess;
 uniform vec3 viewPosition;
@@ -27,6 +28,16 @@ uniform vec3 lightAmbient;
 uniform vec3 lightDiffuse;
 uniform vec3 lightSpecular;
 uniform vec3 geoColor;
+
+vec3 depthTest()
+{
+    mat4 invViewMat = inverse(uViewMat);
+	vec3 wPoint = vec3(invViewMat * vec4(lightPos, 1.0));
+	vec3 lightSpacePoint = vec3(uPerMat * vec4(wPoint, 1.0));
+	lightSpacePoint = lightSpacePoint * 0.5 + 0.5;
+	float realDepth = lightSpacePoint.z;
+	return lightSpacePoint;
+}
 
 // calcLight
 vec4 calcLight()
@@ -44,9 +55,15 @@ vec4 calcLight()
 	return vec4(color, 1.0);
 }
 
+mat4 biMat = mat4(0.5, 0.0, 0.0, 0.0,
+	                  0.0, 0.5, 0.0, 0.0,
+	                  0.0, 0.0, 0.5, 0.0,
+	                  0.5, 0.5, 0.5, 1.0);
+
 void main()
 {
 	rtFragColor = calcLight();
     // Making sure every obj has a different hue
     rtFragColor += vec4(geoColor, 1.0);
+    
 }
