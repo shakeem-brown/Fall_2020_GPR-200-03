@@ -18,7 +18,7 @@ in vec4 vPosClip;
 in vec4 objPos;
 in vec4 norm;
 
-// UNIFORMS
+// UNIFORMS FOR LIGHT & FIGURE PROPERTIES
 uniform mat4 uViewMat, uPerMat;
 uniform vec3 objColor;
 uniform float objShininess;
@@ -29,40 +29,48 @@ uniform vec3 lightDiffuse;
 uniform vec3 lightSpecular;
 uniform vec3 geoColor;
 
+// depthTest: used to test when a shadow needs to be drawn and where
+// for perspective projection
 vec3 depthTest()
 {
-    mat4 invViewMat = inverse(uViewMat);
-	vec3 wPoint = vec3(invViewMat * vec4(lightPos, 1.0));
-	vec3 lightSpacePoint = vec3(uPerMat * vec4(wPoint, 1.0));
-	lightSpacePoint = lightSpacePoint * 0.5 + 0.5;
-	float realDepth = lightSpacePoint.z;
-	return lightSpacePoint;
+    mat4 invViewMat = inverse(uViewMat); // inverse of view matrix
+	vec3 wPoint = vec3(invViewMat * vec4(lightPos, 1.0)); // world's position in space
+	vec3 lightSpacePoint = vec3(uPerMat * vec4(wPoint, 1.0)); // light's position in space
+	lightSpacePoint = lightSpacePoint * 0.5 + 0.5; // NDC -> space: [-1, +1] -> [0, 1]
+	float realDepth = lightSpacePoint.z; // defining the light space point's "z" for later use.
+	return lightSpacePoint; // curently returns the light space point
 }
 
-// calcLight
+// calcLight: caluculates light and its effect of the figures
 vec4 calcLight()
 {
    vec3 lightPos = normalize(lightPos - objPos.xyz); // calculates the light's Position
    vec3 viewVec = normalize(viewPosition.xyz - objPos.xyz); // calcultes the view vector
-   vec3 refLightVec = reflect(-(lightPos), norm.xyz);  // calculates the reflected light vector
+   vec3 refLightVec = reflect(-lightPos, norm.xyz);  // calculates the reflected light vector
  
+   // Calculates the light's specular intensity
    vec3 specIntensity = pow(max(0.0, dot(viewVec,refLightVec)), objShininess) * lightSpecular;
+   // Calculates the light's diffuse intensity
    vec3 diffIntensity = lightDiffuse * dot(viewVec,lightPos);
    
-   float dis = distance(lightPos, objPos.xyz);
+   float dis = distance(lightPos, objPos.xyz); // The distance between light position and object position
+   // Calculates the attenuation
    float attenuation = 1.0 /(1.0 + 0.1*dis + 0.01*dis*dis);
+   // The color changes being calculated based on the light with the figures
    vec3 color = ((diffIntensity + specIntensity)*attenuation + lightAmbient)*geoColor;
 	return vec4(color, 1.0);
 }
 
+// Bias multiplcation to map those [-1, 1] values to [0, 1]
 mat4 biMat = mat4(0.5, 0.0, 0.0, 0.0,
-	                  0.0, 0.5, 0.0, 0.0,
-	                  0.0, 0.0, 0.5, 0.0,
-	                  0.5, 0.5, 0.5, 1.0);
+	              0.0, 0.5, 0.0, 0.0,
+	              0.0, 0.0, 0.5, 0.0,
+	              0.5, 0.5, 0.5, 1.0);
 
 void main()
 {
-	rtFragColor = calcLight();
+	rtFragColor = calcLight(); // outputs the light
+	
     // Making sure every obj has a different hue
     rtFragColor += vec4(geoColor, 1.0);
     

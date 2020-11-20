@@ -27,7 +27,6 @@ void main()
 	vec4 pos_view = modelViewMat * aPosition;
 	vec4 pos_clip = uProjMat * pos_view;
 	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
-	
-	vPosClip = gl_Position;
+	vPosClip = gl_Position; // view position clip is set equal to the position
 }
 

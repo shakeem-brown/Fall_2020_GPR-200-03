@@ -9,11 +9,9 @@
 
 //  OBJECT-SPACE
 layout (location = 0) in vec4 aPositionS;
-layout(location = 1) in vec3 aNormal;
 
 // TRANSFORM UNIFORMS
 uniform mat4 uModelMat, uViewMat, uProjMat;
-uniform vec3 lightPos;
 
 // VARYINGS
 out vec4 vPosClip;
@@ -24,8 +22,5 @@ void main()
     mat4 modelViewMat = uViewMat * uModelMat;
 	vec4 pos_view = modelViewMat * aPositionS;
 	gl_Position = uProjMat * uViewMat * uModelMat * aPositionS;
-	
-	
-	
-	vPosClip = gl_Position;
+	vPosClip = gl_Position; // view position clip is set equal to the position
 }
