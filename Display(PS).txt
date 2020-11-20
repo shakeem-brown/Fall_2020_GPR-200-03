@@ -11,16 +11,27 @@
 precision highp float;
 #endif // GL_ES
 
+// TRANSFORM UNIFORMS
 uniform sampler2D uTex;
 uniform vec2 uResolution;
 
 // VARYINGS
 in vec2 vTexcoord;
+in vec4 vPosClip;
 
 layout (location = 0) out vec4 rtFragColor;
 
 void main()
 {
+    // MANUAL PERSEPECTIVE DIVIDE
+	vec4 posNDC = vPosClip / vPosClip.w;
+	// [-1, +1] -> [0, 1]
+	
+	// SCREEN-SPACE
+	vec4 posScreen = posNDC * 0.5 + 0.5;
+	rtFragColor = posScreen;
+	// [-1, +1] -> [0, 1]
+
 	vec2 uv = vTexcoord / uResolution;
 	vec4 color = texture(uTex, uv);
 	
