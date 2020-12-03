@@ -2,7 +2,7 @@
 //#version 450
 
 /*
-	Title: Lab 8 Shader Pipelines
+	Title: Final Project Rain with Light[n]ing
 	Instructor Name: Daniel Buckstein
 	Authors: Andrew Barnett & Shakeem Brown
 */
@@ -13,11 +13,16 @@ precision highp float;
 
 layout (location = 0) out vec4 rtFragColor;
 
-// VARYING
-in vec4 vPosClip;
+uniform vec4 mouseClick;
 
 void main()
 {
-	vec4 lightColor = vec4(1.0); // White color
-    rtFragColor = lightColor; // Returns the obj light color
+	vec4 dropletColor = vec4(0.0, 1.0, 1.0, 1.0);
+	
+	if (mouseClick.z == 1.0)
+	{
+		dropletColor.r = 1.0;
+	}
+	
+	rtFragColor = dropletColor;
 }

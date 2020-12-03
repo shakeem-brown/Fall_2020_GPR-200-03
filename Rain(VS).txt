@@ -1,0 +1,25 @@
+#version 300 es
+//#version 450
+
+/*
+	Title: Final Project Rain with Light[n]ing
+	Instructor Name: Daniel Buckstein
+	Authors: Andrew Barnett & Shakeem Brown
+*/
+
+
+// OBJECT-SPACE
+layout (location = 0) in vec4 aPosition;
+
+
+// TRANSFORM UNIFORMS
+uniform mat4 uModelMat, uViewMat, uProjMat;
+
+void main()
+{
+	// OBJECT POSITION PIPELINE
+    mat4 modelViewMat = uViewMat * uModelMat;
+	vec4 pos_view = modelViewMat * aPosition;
+	vec4 pos_clip = uProjMat * pos_view;
+	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
+}

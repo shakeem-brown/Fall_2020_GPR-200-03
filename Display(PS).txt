@@ -2,7 +2,7 @@
 //#version 450
 
 /*
-	Title: Lab 8 Shader Pipelines
+	Title: Final Project Rain with Light[n]ing
 	Instructor Name: Daniel Buckstein
 	Authors: Andrew Barnett & Shakeem Brown
 */
@@ -13,67 +13,7 @@ precision highp float;
 
 layout (location = 0) out vec4 rtFragColor;
 
-// TRANSFORM UNIFORMS#version 300 es
-//#version 450
-
-/*
-	Title: Lab 8 Shader Pipelines
-	Instructor Name: Daniel Buckstein
-	Authors: Andrew Barnett & Shakeem Brown
-*/
-
-#ifdef GL_ES
-precision highp float;
-#endif // GL_ES
-
-layout (location = 0) out vec4 rtFragColor;
-
-// TRANSFORM UNIFORMS
-uniform sampler2D uTex; // The RT texture
-uniform vec2 uResolution; // The full screen resolution
-
-// VARYINGS
-in vec2 vTexcoord;
-in vec4 vPosClip;
-
 void main()
 {
-    // MANUAL PERSEPECTIVE DIVIDE
-    // [-1, +1] -> [0, 1]
-	vec4 posNDC = vPosClip / vPosClip.w;
-	
-	// SCREEN-SPACE
-	vec4 posScreen = posNDC * 0.5 + 0.5;
-	// [-1, +1] -> [0, 1]
-	rtFragColor = posScreen;
-
-    // TEXTURING
-	vec2 uv = vTexcoord / uResolution;
-	vec4 color = texture(uTex, uv);
-	
-	rtFragColor += color; // Adding screen space with the texturing
-}
-uniform sampler2D uTex; // The RT texture
-uniform vec2 uResolution; // The full screen resolution
-
-// VARYINGS
-in vec2 vTexcoord;
-in vec4 vPosClip;
-
-void main()
-{
-    // MANUAL PERSEPECTIVE DIVIDE
-    // [-1, +1] -> [0, 1]
-	vec4 posNDC = vPosClip / vPosClip.w;
-	
-	// SCREEN-SPACE
-	vec4 posScreen = posNDC * 0.5 + 0.5;
-	// [-1, +1] -> [0, 1]
-	rtFragColor = posScreen;
-
-    // TEXTURING
-	vec2 uv = vTexcoord / uResolution;
-	vec4 color = texture(uTex, uv);
-	
-	rtFragColor += color; // Adding screen space with the texturing
+	//rtFragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }
