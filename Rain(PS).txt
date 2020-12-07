@@ -12,16 +12,52 @@ precision highp float;
 #endif // GL_ES
 
 layout (location = 0) out vec4 rtFragColor;
+layout(location = 1) out float visibility;
+
+in vec4 worldPos;
+in vec4 norm;
 
 uniform vec4 mouseClick;
+//uniform mat4 uViewMat, uPerMat;
+uniform vec3 objColor;
+uniform float objShininess;
+uniform vec3 viewPosition;
+uniform vec3 lightPos;
+uniform vec3 lightAmbient;
+uniform vec3 lightDiffuse;
+uniform vec3 lightSpecular;
+uniform sampler2D shadowMap;
+
+
+// calcLight: caluculates light and its effect of the figures
+vec4 calcLight()
+{
+   vec3 lightPos = normalize(lightPos - worldPos.xyz); // calculates the light's Position
+   vec3 viewVec = normalize(viewPosition.xyz - worldPos.xyz); // calcultes the view vector
+   vec3 refLightVec = reflect(-lightPos, norm.xyz);  // calculates the reflected light vector
+ 
+   // Calculates the light's specular intensity
+   vec3 specIntensity = pow(max(0.0, dot(viewVec,refLightVec)), objShininess) * lightSpecular;
+   // Calculates the light's diffuse intensity
+   vec3 diffIntensity = lightDiffuse * dot(viewVec,lightPos);
+   
+   float dis = distance(lightPos, worldPos.xyz); // The distance between light position and object position
+   // Calculates the attenuation
+   float attenuation = 1.0 /(1.0 + 0.1*dis + 0.01*dis*dis);
+   // The color changes being calculated based on the light with the figures
+   vec3 color = ((diffIntensity + specIntensity)*attenuation) * visibility;
+   color = (color + lightAmbient);
+
+   return vec4(color, 1.0);
+}
 
 void main()
 {
-	vec4 dropletColor = vec4(0.0, 1.0, 1.0, 1.0);
+	vec4 dropletColor = vec4(1.0, 1.0, 1.0, 1.0);
 	
 	if (mouseClick.z == 1.0)
 	{
-		dropletColor.r = 1.0;
+		dropletColor = calcLight();
 	}
 	
 	rtFragColor = dropletColor;
