@@ -1,5 +1,4 @@
-#version 300 es
-//#version 450
+#version 330 core
 
 /*
 	Title: Final Project Rain with Light[n]ing
@@ -7,17 +6,14 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-#ifdef GL_ES
-precision highp float;
-#endif // GL_ES
-
 layout (location = 0) out vec4 rtFragColor;
-layout(location = 1) out float visibility;
+
+/*
+	layout(location = 1) out float visibility;
 
 in vec4 worldPos;
 in vec4 norm;
 
-uniform vec4 mouseClick;
 //uniform mat4 uViewMat, uPerMat;
 uniform vec3 objColor;
 uniform float objShininess;
@@ -50,15 +46,20 @@ vec4 calcLight()
 
    return vec4(color, 1.0);
 }
+*/
+
+uniform vec4 mouseClick;
 
 void main()
 {
-	vec4 dropletColor = vec4(1.0, 1.0, 1.0, 1.0);
-	
+	vec4 dropletColor = vec4(1.0, 1.0, 0.0, 1.0);
+    
+    
 	if (mouseClick.z == 1.0)
 	{
-		dropletColor = calcLight();
+		dropletColor.r = 0.0;
 	}
-	
-	rtFragColor = dropletColor;
+    
+    
+    rtFragColor = dropletColor;
 }

@@ -1,5 +1,4 @@
-#version 300 es
-//#version 450
+#version 330 core
 
 /*
 	Title: Final Project Rain with Light[n]ing
@@ -7,23 +6,46 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
 
-// OBJECT-SPACE
-layout (location = 0) in vec4 aPosition;
-
-out vec4 worldPos;
-out vec4 norm;
+out VS_OUT 
+{
+    vec3 normal;
+    vec4 camera;
+} vs_out;
 
 // TRANSFORM UNIFORMS
-uniform mat4 uModelMat, uViewMat, uProjMat;
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
+
+// CAMERA UNIFORM 
+uniform vec4 cameraPos;
+uniform vec3 billboardSize;
+uniform vec3 billboardCenterPos;
 
 void main()
 {
-	// OBJECT POSITION PIPELINE
-	vec4 pos_world = uModelMat * aPosition;
-	worldPos = pos_world;
+	// Defining the geometry of sphere and outing the line (normal) properties
+    mat3 normalMatrix = mat3(transpose(inverse(view * model)));
+    vs_out.normal = vec3(projection * vec4(normalMatrix * aNormal, 0.0));
+    gl_Position = projection * view * model * vec4(aPos, 1.0); 
+    
+    // Putting the camera into world-space.
+    mat4 inverseView = inverse(view);
+    vec4 cameraRight_worldSpace = inverseView * cameraPos;
+    vs_out.camera = cameraRight_worldSpace;
+    
+    // This constant helps define square verties, It is found here:
+    // http://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/billboards/#solution-2--the-3d-way
+    float g_vertex_buffer_data[] = float[](-0.5, -0.5, 0.0,
+									        0.5, -0.5, 0.0,
+									       -0.5, 0.5, 0.0,
+									        0.5, 0.5, 0.0);
 	
-	vec4 pos_view = uViewMat * pos_world;
-	vec4 pos_clip = uProjMat * pos_view;
-	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
+	// Was synthesis by the square vetries array above.
+	vec3 squareVertices = vec3(-0.5, 0.5, 0.0);						        
+    vec3 vertexPos = billboardCenterPos + cameraRight_worldSpace.xyz * squareVertices * billboardSize;
+									        
 }

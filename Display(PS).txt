@@ -1,5 +1,4 @@
-#version 300 es
-//#version 450
+#version 330 core
 
 /*
 	Title: Final Project Rain with Light[n]ing
@@ -7,13 +6,11 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-#ifdef GL_ES
-precision highp float;
-#endif // GL_ES
-
 layout (location = 0) out vec4 rtFragColor;
 
 void main()
 {
-	//rtFragColor = vec4(1.0, 1.0, 1.0, 1.0);
+	rtFragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }
+
+

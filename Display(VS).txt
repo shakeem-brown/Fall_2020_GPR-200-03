@@ -1,5 +1,4 @@
-#version 300 es
-//#version 450
+#version 330 core
 
 /*
 	Title: Lab 8 Shader Pipelines
@@ -8,22 +7,17 @@
 */
 
 // OBJECT-SPACE
-layout (location = 0) in vec4 aPositionD;
+layout (location = 0) in vec4 aPosition;
 
 // TRANSFORM UNIFORMS
 uniform mat4 uModelMat, uViewMat, uProjMat;
-
-// VARYINGS
-out vec2 vTexcoord;
 
 void main()
 {
 	// OBJECT POSITION PIPELINE
     mat4 modelViewMat = uViewMat * uModelMat;
-	vec4 pos_view = modelViewMat * aPositionD;
+	vec4 pos_view = modelViewMat * aPosition;
 	vec4 pos_clip = uProjMat * pos_view;
-	gl_Position = uProjMat * uViewMat * uModelMat * aPositionD;
-	
-	// NDC -> screen : [-1, +1] -> [0, 1]
-	vTexcoord = aPositionD.xy * 0.5 + 0.5;
+	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
 }
+
