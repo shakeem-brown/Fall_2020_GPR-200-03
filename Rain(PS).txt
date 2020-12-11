@@ -8,13 +8,6 @@
 
 layout (location = 0) out vec4 rtFragColor;
 
-/*
-	layout(location = 1) out float visibility;
-
-in vec4 worldPos;
-in vec4 norm;
-
-//uniform mat4 uViewMat, uPerMat;
 uniform vec3 objColor;
 uniform float objShininess;
 uniform vec3 viewPosition;
@@ -22,9 +15,13 @@ uniform vec3 lightPos;
 uniform vec3 lightAmbient;
 uniform vec3 lightDiffuse;
 uniform vec3 lightSpecular;
-uniform sampler2D shadowMap;
 
+// Varrying
+in vec4 worldPos;
+in vec4 norm;
+in float lifeline;
 
+/*
 // calcLight: caluculates light and its effect of the figures
 vec4 calcLight()
 {
@@ -52,7 +49,7 @@ uniform vec4 mouseClick;
 
 void main()
 {
-	vec4 dropletColor = vec4(1.0, 1.0, 0.0, 1.0);
+	vec4 dropletColor = vec4(0.0, 0.3, 0.7, 1.0);
     
     
 	if (mouseClick.z == 1.0)

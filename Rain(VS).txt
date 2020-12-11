@@ -6,8 +6,9 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-layout (location = 0) in vec3 aPos;
+layout (location = 0) in vec4 aPos;
 layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec3 vPos;
 
 out VS_OUT 
 {
@@ -21,17 +22,138 @@ uniform mat4 view;
 uniform mat4 model;
 
 // CAMERA UNIFORM 
-uniform vec4 cameraPos;
-uniform vec3 billboardSize;
-uniform vec3 billboardCenterPos;
+uniform float deltaTime;
+uniform float particleSize;
+
+// Varrying
+out vec4 worldPos;
+out vec4 norm;
+out float lifeline;
+
+/*
+const int MAX_PARTICLES = 10000; // Ten thousand
+Particle ParticlesContainer[MAX_PARTICLES];
+int lastUsedParticle = 0;
+
+// http://www.opengl-tutorial.org/intermediate-tutorials/billboards-particles/particles-instancing/
+int FindUnusedParticle()
+{
+	// Uses max particles as size cap
+	for (int i = lastUsedParticle; i < MAX_PARTICLES; i++)
+	{
+		if (ParticlesContainer[i].life < 0)
+		{
+			lastUsedParticle = i;
+			return i;
+		}
+	}
+	
+	// Uses last particle as size cap
+	for (int i = 0; i < lastUsedParticle; i++)
+	{
+		if (ParticlesContainer[i].life < 0)
+		{
+			lastUsedParticle = i;
+			return i;
+		}
+	}
+	return 0;
+}
+
+int newparticles = (int)(deltaTime * 10000.0);
+if (newparticles > (int)(0.016f*10000.0))
+{
+	newparticles = (int)(0.016f*10000.0);
+}
+    
+int ParticlesCount = 0;
+for(int i=0; i<MaxParticles; i++){
+
+    Particle& p = ParticlesContainer[i]; // shortcut
+
+    if(p.life > 0.0f){
+
+        // Decrease life
+        p.life -= delta;
+        if (p.life > 0.0f){
+
+            // Simulate simple physics : gravity only, no collisions
+            p.speed += glm::vec3(0.0f,-9.81f, 0.0f) * (float)delta * 0.5f;
+            p.pos += p.speed * (float)delta;
+            p.cameradistance = glm::length2( p.pos - CameraPosition );
+            //ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;
+
+            // Fill the GPU buffer
+            g_particule_position_size_data[4*ParticlesCount+0] = p.pos.x;
+            g_particule_position_size_data[4*ParticlesCount+1] = p.pos.y;
+            g_particule_position_size_data[4*ParticlesCount+2] = p.pos.z;
+
+            g_particule_position_size_data[4*ParticlesCount+3] = p.size;
+        }
+        else
+        {
+            // Particles that just died will be put at the end of the buffer in SortParticles();
+            p.cameradistance = -1.0f;
+        }
+
+        ParticlesCount++;
+
+    }
+}
+*/
+
+struct Point
+{
+	vec4 position;
+	vec3 velocity;
+	float life;
+};
+
+//https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+float rand(vec2 co)
+{
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233)))*43758.5453);
+}
+
+const int MAX_POINTS = 100;
+vec3 generatePoints(Point pointContainer[MAX_POINTS])
+{
+
+	for(int i = 0; i < MAX_POINTS; i++)
+	{
+		// Creates the starting point
+		pointContainer[i].position = aPos;
+		
+		// Updates the position from the starting point
+		pointContainer[i].position += rand(vec2(0.5, 1.0)); 
+		pointContainer[i].life = rand(vec2(1.0, 2.0)); 
+	}
+	
+	return vec3(0.1);
+}
 
 void main()
 {
-	// Defining the geometry of sphere and outing the line (normal) properties
+	// MIGHT REMOVE LATER
     mat3 normalMatrix = mat3(transpose(inverse(view * model)));
     vs_out.normal = vec3(projection * vec4(normalMatrix * aNormal, 0.0));
-    gl_Position = projection * view * model * vec4(aPos, 1.0); 
     
+    // Passing world Position
+    worldPos = model * aPos;
+    
+    // Similuating particles
+    worldPos.xy += particleSize * (vPos.xy - vec2(0.5));
+    gl_Position = projection * view * worldPos;
+    lifeline = aPos.w;
+
+    // MIGHT REMOVE LATER
+    // Passing normal
+    norm = vec4(aNormal, 0.0);
+    
+   
+    
+   
+    /* 
     // Putting the camera into world-space.
     mat4 inverseView = inverse(view);
     vec4 cameraRight_worldSpace = inverseView * cameraPos;
@@ -47,5 +169,5 @@ void main()
 	// Was synthesis by the square vetries array above.
 	vec3 squareVertices = vec3(-0.5, 0.5, 0.0);						        
     vec3 vertexPos = billboardCenterPos + cameraRight_worldSpace.xyz * squareVertices * billboardSize;
-									        
+	*/								        
 }
