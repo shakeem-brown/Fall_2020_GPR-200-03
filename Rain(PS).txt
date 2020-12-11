@@ -16,10 +16,13 @@ uniform vec3 lightAmbient;
 uniform vec3 lightDiffuse;
 uniform vec3 lightSpecular;
 
+uniform vec2 resolution;
+
 // Varrying
 in vec4 worldPos;
 in vec4 norm;
 in float lifeline;
+in vec2 vTexcoord;
 
 /*
 // calcLight: caluculates light and its effect of the figures
@@ -49,9 +52,11 @@ uniform vec4 mouseClick;
 
 void main()
 {
+	// Texturing
+    //vec2 uv = vTexcoord * resolution;    
 	vec4 dropletColor = vec4(0.0, 0.3, 0.7, 1.0);
     
-    
+    //vec4(uv.x, 1.0, uv.y, 1.0);
 	if (mouseClick.z == 1.0)
 	{
 		dropletColor.r = 0.0;

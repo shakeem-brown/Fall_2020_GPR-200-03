@@ -29,6 +29,7 @@ uniform float particleSize;
 out vec4 worldPos;
 out vec4 norm;
 out float lifeline;
+out vec2 vTexcoord;
 
 /*
 const int MAX_PARTICLES = 10000; // Ten thousand
@@ -150,7 +151,7 @@ void main()
     // Passing normal
     norm = vec4(aNormal, 0.0);
     
-   
+    //vTexcoord =  aPos.xy * 0.5 + 0.5;
     
    
     /* 
