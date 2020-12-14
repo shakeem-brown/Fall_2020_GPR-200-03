@@ -1,0 +1,20 @@
+#version 330 core
+
+/*
+	Title: Final Project Rain with Light[n]ing
+	Instructor Name: Daniel Buckstein
+	Authors: Andrew Barnett & Shakeem Brown
+*/
+
+layout (location = 0) out vec4 rtFragColor;
+
+// Varryings from the vertex shader
+in vec4 color;
+in vec2 vTexCoord;
+
+void main() 
+{
+	vec2 uv = vTexCoord;
+    rtFragColor = color;
+    //rtFragColor = vec4(1.0);
+}

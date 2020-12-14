@@ -1,0 +1,68 @@
+#version 330 core
+
+/*
+	Title: Final Project Rain with Light[n]ing
+	Instructor Name: Daniel Buckstein
+	Authors: Andrew Barnett & Shakeem Brown
+*/
+
+layout (location = 0) in vec4 aPos;
+
+// TRANSFORM UNIFORMS
+uniform mat4 uProjMat, uViewMat, uModelMat;
+uniform mat3 matrixP;
+
+// RAIN UNIFORMS
+uniform float layers;
+uniform float depth;
+uniform float width;
+uniform float velocity;
+uniform float time;
+uniform vec2 resolution;
+uniform vec4 mouseClick;
+
+// Varrying Passed to the fragment shader
+out vec4 color;
+out vec2 vTexCoord;
+
+// Inspired by @  baldand's "Just Snow"
+// https://www.shadertoy.com/view/ldsGDn
+// lightning:  A function that helps simulate lighting flashes
+// 		vec3 col: the color of the background
+vec3 lightning(in vec3 col, in float _time)
+{
+   float theta = 5.0 * sin(_time * 0.1);
+   vTexCoord = aPos.xy * 0.5 + 0.5;
+   vec2 uv = vTexCoord / resolution;
+   
+   for (int i = 0; i < layers; i++)
+   {
+   		float intToFloat = float(i);
+   		vec2 q = uv * (1.0 + intToFloat * depth);
+   		q += vec2(q.y * (width * mod(intToFloat * 7.238917, 1.0) - width * 0.5), velocity * time / (1.0 + intToFloat * depth * 0.03));
+   		vec3 n = vec3(floor(q), 31.189 + intToFloat);
+   		vec3 m = floor(n) * 0.00001 + fract(n);
+   		vec3 mp = (3145.9 + m) / fract(matrixP * m);
+   		vec3 r = fract(mp);
+   		vec2 s = abs(mod(q, 1.0) - 0.5 + 0.9 * r.xy - 0.45);
+   		s += 0.01 * abs(2.0 * fract(10.0 * q.yx) - 1.0);
+   		float d = 0.6 * max(s.x - s.y, s.x + s.y) + max(s.x, s.y) - 0.1;
+   		float edge = 0.005 + 0.05 * min(0.5 * abs(intToFloat - 5.0 - theta), 1.0);
+   		color.xyz += vec3(smoothstep(edge, -edge, d) * (r.x / (1.0 + 0.02 * intToFloat * depth)));   
+   }
+	return col;
+}
+
+void main() 
+{
+   color = vec4(0.0, 0.09, 0.25, 1.0); // midnight blue color
+   gl_Position = uProjMat * uViewMat * uModelMat * aPos;
+   
+   lightning(color.xyz, time * 31.4159); // pi * 10.0
+   
+   if (mouseClick.z > 0.0)
+   {
+   	 lightning(color.xyz, time);
+   }
+   
+}
