@@ -6,26 +6,103 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-layout (triangles) in;
-layout (line_strip, max_vertices = 12) out;
+layout (points) in;
+layout (points) out;
+layout (max_vertices = 40) out;
 
-in VS_OUT {
-    vec3 normal;
-    vec4 camera;
-} gs_in[];
+// VARRYINGS FROM VERTEX SHADER
+in Vertex {
+	vec4 position;
+	vec3 velocity;
+    vec4 color;
+    float lifetime;
+    float size;
+    int j;
+} vertex[];
 
-void GenerateLine(int i)
+// UTILITY UNIFORMS
+uniform mat4 projection; // uProjMat
+uniform mat4 view; // uViewMat
+uniform mat4 model; // uModelMat
+
+// PARTICLE UNIFORMS
+uniform vec4 particleGenPos;
+uniform vec3 gravityGenVec;
+uniform vec3 velocityGenMin;
+uniform vec3 velocityGenRange;
+uniform vec3 colorGen;
+uniform float sizeGen;
+uniform float lifeGenMin;
+uniform float lifeGenRange;
+uniform float timePassed;
+uniform int jNumToGen;
+
+uniform vec3 randomSeed;
+vec3 localSeed;
+
+// REMOVE LATER
+uniform float particleSize; // 0.5
+
+// VARRYINGS SENT FURTHER
+out vec2 vs_UV;
+out vec4 aPosOut;
+out vec3 aVelocityOut;
+out vec4 aColorOut;
+out float fLifeTimeOut;
+out float fSizeOut;
+out int jTypeOut;
+
+// randNumRange: returns a random number from 0 to 1
+float randNumRange()
 {
-    gl_Position = gl_in[i].gl_Position;
-    EmitVertex();
-    gl_Position = gl_in[i].gl_Position + vec4(gs_in[i].normal, 0.0) * MAGNITUDE;
-    EmitVertex();
-    EndPrimitive();
+	uint n = floatBitsToUint(localSeed.y * 214013.0 + localSeed.x * 2531011.0 + localSeed.z * 141251.0);
+	n = n * (n * n * 15731u + 789221u);
+	n = (n >> 9u) | 0x3F800000u;
+	
+	float fRes = 2.0 - uintBitsToFloat(n);
+	localSeed = vec3(localSeed.x + 147158.0 * fRes, localSeed.y * fRes + 415161.0 * fRes, localSeed.z + 324154.0 * fRes);
+	return fRes;
+}
+
+void generateParticles(in int i)
+{ 
+	vec4 vertPos = gl_in[i].gl_Position;
+	mat4 modelViewMatrix = projection * view * model;
+	
+	// LOWER LEFT CORNER
+	vec2 llcPos = vertPos.xy + vec2(-0.5, -0.5) * particleSize;
+	gl_Position = modelViewMatrix * vec4(llcPos, vertPos.zw);
+	vs_UV = vec2(0.0, 0.0);
+	aColorOut = vertex[i].color;
+	EmitVertex();
+	
+	// UPPER LEFT CORNER
+	vec2 ulcPos = vertPos.xy + vec2(-0.5, 0.5) * particleSize;
+	gl_Position = modelViewMatrix * vec4(ulcPos, vertPos.zw);
+	vs_UV = vec2(0.0, 1.0);
+	aColorOut = vertex[i].color;
+	EmitVertex();
+	
+	// LOWER RIGHT CORNER
+	vec2 lrcPos = vertPos.xy + vec2(0.5, -0.5) * particleSize;
+	gl_Position = modelViewMatrix * vec4(lrcPos, vertPos.zw);
+	vs_UV = vec2(1.0, 0.0);
+	aColorOut = vertex[i].color;
+	EmitVertex();
+	
+	// UPPER RIGHT CORNER
+	vec2 urcPos = vertPos.xy + vec2(0.5, 0.5) * particleSize;
+	gl_Position = modelViewMatrix * vec4(urcPos, vertPos.zw);
+	vs_UV = vec2(1.0, 1.0);
+	aColorOut = vertex[i].color;
+	EmitVertex();
+	
+	EndPrimitive();
 }
 
 void main()
 {
-    GenerateLine(0); // first vertex normal
-    GenerateLine(1); // second vertex normal
-    GenerateLine(2); // third vertex normal
+    generateParticles(0);  
+    generateParticles(1);  
+    generateParticles(2);  
 }

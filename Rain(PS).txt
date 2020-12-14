@@ -6,62 +6,89 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-layout (location = 0) out vec4 rtFragColor;
+layout (location = 0) out vec4 aPosition;
+layout (location = 1) out vec4 rtFragColor;
 
-uniform vec3 objColor;
-uniform float objShininess;
-uniform vec3 viewPosition;
-uniform vec3 lightPos;
-uniform vec3 lightAmbient;
-uniform vec3 lightDiffuse;
-uniform vec3 lightSpecular;
-
-uniform vec2 resolution;
-
-// Varrying
-in vec4 worldPos;
-in vec4 norm;
-in float lifeline;
-in vec2 vTexcoord;
-
-/*
-// calcLight: caluculates light and its effect of the figures
-vec4 calcLight()
-{
-   vec3 lightPos = normalize(lightPos - worldPos.xyz); // calculates the light's Position
-   vec3 viewVec = normalize(viewPosition.xyz - worldPos.xyz); // calcultes the view vector
-   vec3 refLightVec = reflect(-lightPos, norm.xyz);  // calculates the reflected light vector
- 
-   // Calculates the light's specular intensity
-   vec3 specIntensity = pow(max(0.0, dot(viewVec,refLightVec)), objShininess) * lightSpecular;
-   // Calculates the light's diffuse intensity
-   vec3 diffIntensity = lightDiffuse * dot(viewVec,lightPos);
-   
-   float dis = distance(lightPos, worldPos.xyz); // The distance between light position and object position
-   // Calculates the attenuation
-   float attenuation = 1.0 /(1.0 + 0.1*dis + 0.01*dis*dis);
-   // The color changes being calculated based on the light with the figures
-   vec3 color = ((diffIntensity + specIntensity)*attenuation) * visibility;
-   color = (color + lightAmbient);
-
-   return vec4(color, 1.0);
-}
-*/
-
+// UTILITY UNIFORMS
+uniform sampler2D tex0;
 uniform vec4 mouseClick;
+uniform vec2 resolution;
+uniform float time;
+
+
+// LIGHT UNIFORMS
+uniform vec4 light_color; // red
+uniform vec4 light_ambient; // red
+uniform float intensity; // 15.0
+uniform float flickering_speed; // 1.5
+uniform float flickering_offset; // 50.0
+
+// VARRYING
+in vec4 vs_Color;
+in vec2 vs_UV;
+
+// lengthOfVector: the maginute of a vec3
+//		vector3: the vector being applied
+float lengthOfVector(in vec3 v3)
+{
+    // the formula for the magintude of a vector 3
+    return ((v3.x * v3.x) + (v3.y * v3.y) + (v3.z * v3.z)) * 0.5;
+}
+
+vec3 dither(in vec2 vScreenPos)
+{
+    vec2 vector2 = vec2(171.0, 231.0);
+    vec2 theTime = vec2(time);
+    vec2 screenPos_time = vScreenPos.xy + theTime;
+	vec3 vDither = vec3(dot(vector2, screenPos_time));
+	vDither.rgb = fract(vDither.rgb / vec3(103.0, 71.0, 97.0)) - vec3(0.5, 0.5, 0.5);
+	return ( vDither.rgb / 255.0 ) * 0.375;
+}
+
+vec4 calcLight(in vec2 uv, in vec4 image)
+{
+	// DEFINING SCREEN PROPERTIES
+    vec2 resolutionInverse = 1.0 / resolution;
+    float ratio = resolution.y * resolutionInverse.y;
+    vec2 location = ratio * (resolutionInverse * gl_FragCoord.xy);
+    
+    // LIGHT PROPERTIES
+    vec3 lightPos = aPosition.xyz;
+    float light_radius = 128.0; // the radius of the light
+    light_radius += sin(time * flickering_speed) * flickering_offset; // the flickering effect
+    
+    // the delta of the light image in relation to the uv and the screen (& texture later on)
+    vec3 delta = vec3(location - uv, location.x);
+    delta.x /= light_radius / resolution.x; // makes the light's delta.x fixed to the radius
+    delta.y /= light_radius / resolution.y; // makes the light's delta.y fixed to the radius
+    float fragDistoLight = lengthOfVector(delta); // The distance from the light to the image
+    
+    vec3 normal_light_color = light_color.rbg * light_color.a; // The normalzied light color
+    vec3 normal_light_ambient = light_ambient.rgb * light_ambient.a; // the normalized light ambiance color
+    float attenuation = intensity / (lightPos.x + (lightPos.y * fragDistoLight) +
+                                     (lightPos.z * fragDistoLight * fragDistoLight)); // Calculates the attenuation of the light
+	
+    vec3 new_light = normal_light_ambient + normal_light_color * attenuation; // the new light after combining the privous calculations
+    new_light = pow(new_light, light_color.xyz); // the new light raised to the color gray
+    new_light += dither(uv); // using impossible's function to add to the new light
+    
+    // The final shading lampert shading
+   return  vec4(vec3(image.r) * lightPos, image.a);
+}
 
 void main()
-{
-	// Texturing
-    //vec2 uv = vTexcoord * resolution;    
-	vec4 dropletColor = vec4(0.0, 0.3, 0.7, 1.0);
+{ 
+    vec2 uv = vs_UV;
+    uv.y *= -1.0;
     
-    //vec4(uv.x, 1.0, uv.y, 1.0);
+    vec4 theTexture = texture(tex0, uv);
+	vec4 imageOutput = vec4(theTexture);
+	vec4 finalImage = imageOutput * vs_Color;
+	
 	if (mouseClick.z == 1.0)
 	{
-		dropletColor.r = 0.0;
+		finalImage = calcLight(uv, finalImage);
 	}
     
-    
-    rtFragColor = dropletColor;
+    rtFragColor = finalImage;
 }
