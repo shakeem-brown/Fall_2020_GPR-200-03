@@ -7,14 +7,13 @@
 */
 
 layout (location = 0) out vec4 aPosition;
-layout (location = 1) out vec4 rtFragColor;
+layout (location = 6) out vec4 rtFragColor;
 
 // UTILITY UNIFORMS
 uniform sampler2D tex0;
 uniform vec4 mouseClick;
 uniform vec2 resolution;
 uniform float time;
-
 
 // LIGHT UNIFORMS
 uniform vec4 light_color; // red
@@ -24,8 +23,8 @@ uniform float flickering_speed; // 1.5
 uniform float flickering_offset; // 50.0
 
 // VARRYING
-in vec4 vs_Color;
-in vec2 vs_UV;
+flat in vec4 colorPart;
+smooth in vec2 vs_UV;
 
 // lengthOfVector: the maginute of a vec3
 //		vector3: the vector being applied
@@ -82,12 +81,11 @@ void main()
     uv.y *= -1.0;
     
     vec4 theTexture = texture(tex0, uv);
-	vec4 imageOutput = vec4(theTexture);
-	vec4 finalImage = imageOutput * vs_Color;
+	vec4 finalImage = vec4(theTexture.xyz, 1.0) * colorPart;
 	
 	if (mouseClick.z == 1.0)
 	{
-		finalImage = calcLight(uv, finalImage);
+		//finalImage = calcLight(uv, finalImage);
 	}
     
     rtFragColor = finalImage;

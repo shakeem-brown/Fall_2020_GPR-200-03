@@ -14,31 +14,21 @@ layout (location = 4) in float fSize;
 layout (location = 5) in int jType;
 
 // VARRYINGS PASSED TO GEOMETRY SHADER
-out Vertex 
-{
-	vec4 position;
-	vec3 velocity;
-    vec4 color;
-    float lifetime;
-    float size;
-    int j;
-} vertex;
-
-// TRANSFORM UNIFORMS
-uniform mat4 projection; // uProjMat
-uniform mat4 view; // uViewMat
-uniform mat4 model; // uModelMat
-
-// VARRYING
+out vec4 position;
+out vec3 velocity;
+out vec4 color;
+out float lifetime;
+out float size;
+out int j;
 
 void main()
 {
 	// PASSING TO GEOMETRY SHADER
-	vertex.position = aPos;
-	vertex.velocity = aVelocity;
-	vertex.color = aColor;
-	vertex.lifetime = fLifeTime;
-	vertex.size = fSize;
-	vertex.j = jType;
-	gl_Position = projection * view * model * aPos;
+	position = aPos;
+	velocity = aVelocity;
+	color = aColor;
+	lifetime = fLifeTime;
+	size = fSize;
+	j = jType;
+	gl_Position = aPos;;
 }

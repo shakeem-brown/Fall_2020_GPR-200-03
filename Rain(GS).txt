@@ -6,51 +6,41 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-layout (points) in;
-layout (points) out;
-layout (max_vertices = 40) out;
+layout (lines) in;
+layout (triangle_strip) out;
+layout (max_vertices = 12) out;
 
-// VARRYINGS FROM VERTEX SHADER
-in Vertex {
-	vec4 position;
-	vec3 velocity;
-    vec4 color;
-    float lifetime;
-    float size;
-    int j;
-} vertex[];
-
-// UTILITY UNIFORMS
-uniform mat4 projection; // uProjMat
-uniform mat4 view; // uViewMat
-uniform mat4 model; // uModelMat
+// TRANSFORM UNIFORMS
+uniform mat4 uProjMat, uViewMat, uModelMat;
 
 // PARTICLE UNIFORMS
 uniform vec4 particleGenPos;
-uniform vec3 gravityGenVec;
-uniform vec3 velocityGenMin;
-uniform vec3 velocityGenRange;
-uniform vec3 colorGen;
+uniform vec3 gravityGenVec, velocityGenMin, velocityGenRange;
+uniform vec4 colorGen;
 uniform float sizeGen;
-uniform float lifeGenMin;
-uniform float lifeGenRange;
+uniform float lifeGenMin, lifeGenRange;
 uniform float timePassed;
 uniform int jNumToGen;
-
 uniform vec3 randomSeed;
 vec3 localSeed;
 
-// REMOVE LATER
-uniform float particleSize; // 0.5
+// VARRYINGS FROM VERTEX SHADER
+in vec4 position[];
+in vec3 velocity[];
+in vec4 color[];
+in float lifetime[];
+in float size[];
+in int j[];
 
 // VARRYINGS SENT FURTHER
-out vec2 vs_UV;
 out vec4 aPosOut;
 out vec3 aVelocityOut;
 out vec4 aColorOut;
 out float fLifeTimeOut;
 out float fSizeOut;
 out int jTypeOut;
+smooth out vec2 vs_UV;
+flat out vec4 colorPart;
 
 // randNumRange: returns a random number from 0 to 1
 float randNumRange()
@@ -64,45 +54,85 @@ float randNumRange()
 	return fRes;
 }
 
-void generateParticles(in int i)
-{ 
-	vec4 vertPos = gl_in[i].gl_Position;
-	mat4 modelViewMatrix = projection * view * model;
+void particleGenerator(in int k)
+{
+	aPosOut.xyz = position[k].xyz;
+	aVelocityOut = velocity[k]; 
+	fSizeOut = size[k];
 	
-	// LOWER LEFT CORNER
-	vec2 llcPos = vertPos.xy + vec2(-0.5, -0.5) * particleSize;
-	gl_Position = modelViewMatrix * vec4(llcPos, vertPos.zw);
-	vs_UV = vec2(0.0, 0.0);
-	aColorOut = vertex[i].color;
-	EmitVertex();
+	if (j[k] != 0)
+	{
+		aPosOut.xyz += aVelocityOut * timePassed;
+		vec4 vertPos = aPosOut;
+		mat4 modelViewMatrix = uProjMat * uViewMat * uModelMat;
+		
+		colorPart = vec4(color[k].xyz, lifetime[k]);
+		
+		// LOWER LEFT CORNER
+		vec2 llcPos = vertPos.xy + vec2(-0.5, -0.5) * fSizeOut;
+		gl_Position = modelViewMatrix * vec4(llcPos, vertPos.zw);
+		vs_UV = vec2(0.0, 0.0);
+		EmitVertex();
+		
+		// UPPER LEFT CORNER
+		vec2 ulcPos = vertPos.xy + vec2(-0.5, 0.5) * fSizeOut;
+		gl_Position = modelViewMatrix * vec4(ulcPos, vertPos.zw);
+		vs_UV = vec2(0.0, 1.0);
+		EmitVertex();
+		
+		// LOWER RIGHT CORNER
+		vec2 lrcPos = vertPos.xy + vec2(0.5, -0.5) * fSizeOut;
+		gl_Position = modelViewMatrix * vec4(lrcPos, vertPos.zw);
+		vs_UV = vec2(1.0, 0.0);
+		EmitVertex();
+		
+		// UPPER RIGHT CORNER
+		vec2 urcPos = vertPos.xy + vec2(0.5, 0.5) * fSizeOut;
+		gl_Position = modelViewMatrix * vec4(urcPos, vertPos.zw);
+		vs_UV = vec2(1.0, 1.0);
+		EmitVertex();
+		
+		EndPrimitive();
+	}
 	
-	// UPPER LEFT CORNER
-	vec2 ulcPos = vertPos.xy + vec2(-0.5, 0.5) * particleSize;
-	gl_Position = modelViewMatrix * vec4(ulcPos, vertPos.zw);
-	vs_UV = vec2(0.0, 1.0);
-	aColorOut = vertex[i].color;
-	EmitVertex();
+	if (j[k] != 0)
+	{
+		aVelocityOut += gravityGenVec * timePassed;
+	}
+
+	aColorOut = color[k];
+	fLifeTimeOut = lifetime[k] - timePassed;
+	fSizeOut = size[k];
+	jTypeOut = j[k];
+	vec3 randomVelocityRange = vec3(velocityGenRange.x * randNumRange(), velocityGenRange.y * randNumRange(), velocityGenRange.z * randNumRange());
 	
-	// LOWER RIGHT CORNER
-	vec2 lrcPos = vertPos.xy + vec2(0.5, -0.5) * particleSize;
-	gl_Position = modelViewMatrix * vec4(lrcPos, vertPos.zw);
-	vs_UV = vec2(1.0, 0.0);
-	aColorOut = vertex[i].color;
-	EmitVertex();
-	
-	// UPPER RIGHT CORNER
-	vec2 urcPos = vertPos.xy + vec2(0.5, 0.5) * particleSize;
-	gl_Position = modelViewMatrix * vec4(urcPos, vertPos.zw);
-	vs_UV = vec2(1.0, 1.0);
-	aColorOut = vertex[i].color;
-	EmitVertex();
-	
-	EndPrimitive();
+	if (jTypeOut != 0)
+	{
+		EmitVertex();
+		EndPrimitive();
+		
+		for (int i = 0; i < jNumToGen; i++)
+		{
+			aPosOut.xyz = particleGenPos.xyz;
+			aVelocityOut = velocityGenMin + randomVelocityRange;
+			aColorOut = colorGen;
+			fLifeTimeOut = lifeGenMin + lifeGenRange * randNumRange();
+			fSizeOut = sizeGen;
+			jTypeOut = 1;
+			EmitVertex();
+			EndPrimitive();
+		}
+	}
+	else if (fLifeTimeOut > 0.0)
+	{
+		EmitVertex();
+		EndPrimitive();
+	}
 }
 
 void main()
 {
-    generateParticles(0);  
-    generateParticles(1);  
-    generateParticles(2);  
+	particleGenerator(0);
+	particleGenerator(1);
+	particleGenerator(2);
 }
