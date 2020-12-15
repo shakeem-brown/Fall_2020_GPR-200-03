@@ -55,14 +55,15 @@ vec3 lightning(in vec3 col, in float _time)
 
 void main() 
 {
-   color = vec4(0.0, 0.09, 0.25, 1.0); // midnight blue color
+   color = vec4(0.0, 0.282, 0.455, 1.0); // snowy blue color
    gl_Position = uProjMat * uViewMat * uModelMat * aPos;
    
    lightning(color.xyz, time * 31.4159); // pi * 10.0
+   
    
    if (mouseClick.z > 0.0)
    {
    	 lightning(color.xyz, time);
    }
-   
+
 }

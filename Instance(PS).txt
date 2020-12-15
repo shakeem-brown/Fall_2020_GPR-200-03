@@ -1,0 +1,16 @@
+/*
+	Title: Final Project Rain with Light[n]ing
+	Instructor Name: Daniel Buckstein
+	Authors: Andrew Barnett & Shakeem Brown
+*/
+
+struct PSInput
+{
+	float4 Color : COLOR;
+};
+
+float4 main(PSInput pin) : SV_TARGET
+{
+	pin.Color = float4(1.0);
+	return pin.Color;
+}

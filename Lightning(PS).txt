@@ -16,5 +16,4 @@ void main()
 {
 	vec2 uv = vTexCoord;
     rtFragColor = color;
-    //rtFragColor = vec4(1.0);
 }

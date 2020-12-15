@@ -6,11 +6,18 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-layout (location = 0) out vec4 rtFragColor;
+layout (location = 6) out vec4 rtFragColor;
+
+uniform sampler2D tex0;
+uniform vec2 resolution;
+
+in vec2 vTexCoord;
 
 void main()
 {
-	rtFragColor = vec4(1.0, 1.0, 1.0, 1.0);
+	vec2 uv = vTexCoord / resolution;
+	vec4 image = texture(tex0, uv);
+	rtFragColor = image;
 }
 
 
