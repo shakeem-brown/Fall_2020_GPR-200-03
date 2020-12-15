@@ -1,29 +1,25 @@
 #version 330 core
-
 /*
 	Title: Lab 8 Shader Pipelines
 	Instructor Name: Daniel Buckstein
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
-// OBJECT-SPACE
+//  SPHERE OBJECT-SPACE
 layout (location = 0) in vec4 aPosition;
+layout (location = 1) in vec3 aNormal;
 
 // TRANSFORM UNIFORMS
 uniform mat4 uModelMat, uViewMat, uProjMat;
+uniform vec3 lightPos;
 
-// VARRYINGS
-out vec2 vTexCoord;
+// VARYINGS
+out vec4 vPosClip;
+out vec4 objPos;
+out vec4 norm;
 
 void main()
 {
-	// OBJECT POSITION PIPELINE
-    mat4 modelViewMat = uViewMat * uModelMat;
-	vec4 pos_view = modelViewMat * aPosition;
-	vec4 pos_clip = uProjMat * pos_view;
+    // OBJECT POSITION PIPELINE
 	gl_Position = uProjMat * uViewMat * uModelMat * aPosition;
-	
-	// NDC -> screen : [-1, +1] -> [0, 1]
-	vTexCoord = aPosition.xy * 0.5 + 0.5;
 }
-

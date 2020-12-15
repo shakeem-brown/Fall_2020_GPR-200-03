@@ -1,14 +1,22 @@
+/*
+	Title: Final Project Rain with Light[n]ing
+	Instructor Name: Daniel Buckstein
+	Authors: Andrew Barnett & Shakeem Brown
+*/
+// Holds the particle velocity and position
 struct InputData
 {
 	float4 Position;
 	float4 Velocity;
 };
 
+// delta is the change in time
 cbuffer Uniforms : register(b0)
 {
 	float delta;
 };
 
+// runs buffer
 RWStructuredBuffer<InputData> data : register(u0);
 
 [numthreads(1, 1, 1)]
@@ -19,23 +27,26 @@ void main( uint3 id : SV_DispatchThreadID )
 
 	data[id.x].Position += vel*delta;
 	
+	// Simiulates the snow going down (y)) most of the time
 	if (vel.y > 0.0)
 	{
 		data[id.x].Velocity.y = -1.0 * vel.y;
 	}
 	
-	// make rain go down
+	// Recycles the particles to go back to the top
 	if(pos.y <= -10.0)
 	{
 		data[id.x].Velocity.y = -vel.y;
 		data[id.x].Position.y = 9.99f;
 	}
-
+	
+	// causes the random pattern when particles collide in (x)
 	if (abs(pos.x) >= 10.0f) {
 		data[id.x].Velocity.x = -vel.x;
 		data[id.x].Position.x = 9.99f * sign(pos.x);
 	}
 
+	// cause the random pattern when particles collide in (z)
 	if (abs(pos.z) >= 10.0f) {
 		data[id.x].Velocity.z = -vel.z;
 		data[id.x].Position.z = 9.99f * sign(pos.z);

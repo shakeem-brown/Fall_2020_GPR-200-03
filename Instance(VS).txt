@@ -4,12 +4,14 @@
 	Authors: Andrew Barnett & Shakeem Brown
 */
 
+// Holds the trnasformation matrices
 cbuffer InputVars : register(b0)
 {
 	float4x4 matVP;
 	float4x4 matGeo;
 };
 
+// Holds the particle information
 struct VSInput
 {
 	float3 Position : POSITION;
@@ -18,6 +20,7 @@ struct VSInput
 	float4 Velocity : VELOCITY;
 };
 
+// outputs the color and the postion of the particle
 struct VSOutput
 {
 	float4 Position : SV_POSITION;

@@ -1,0 +1,56 @@
+#version 330 core
+
+/*
+	Title: Lab 8 Shader Pipelines
+	Instructor Name: Daniel Buckstein
+	Authors: Andrew Barnett & Shakeem Brown
+*/
+
+#ifdef GL_ES
+precision highp float;
+#endif // GL_ES
+
+layout (location = 0) out vec4 rtFragColor;
+// VARYINGS
+in vec4 objPos;
+in vec4 norm;
+
+// UNIFORMS FOR LIGHT & FIGURE PROPERTIES
+uniform vec3 objColor;
+uniform float objShininess;
+uniform vec3 viewPosition;
+uniform vec3 lightPos;
+uniform vec3 lightAmbient;
+uniform vec3 lightDiffuse;
+uniform vec3 geoColor;
+uniform vec3 lightSpecular;
+
+// calcLight: caluculates light and its effect of the figures
+vec4 calcLight()
+{
+   vec3 lightPos = normalize(lightPos - objPos.xyz); // calculates the light's Position
+   vec3 viewVec = normalize(viewPosition.xyz - objPos.xyz); // calcultes the view vector
+   vec3 refLightVec = reflect(-lightPos, norm.xyz);  // calculates the reflected light vector
+ 
+   // Calculates the light's specular intensity
+   vec3 specIntensity = pow(max(0.0, dot(viewVec,refLightVec)), objShininess) * lightSpecular;
+   // Calculates the light's diffuse intensity
+   vec3 diffIntensity = lightDiffuse * dot(viewVec,lightPos);
+   
+   float dis = distance(lightPos, objPos.xyz); // The distance between light position and object position
+   // Calculates the attenuation
+   float attenuation = 1.0 /(1.0 + 0.1*dis + 0.01*dis*dis);
+   // The color changes being calculated based on the light with the figures
+   vec3 color = ((diffIntensity + specIntensity)*attenuation);
+   color = (color + lightAmbient)*geoColor;
+
+   return vec4(color, 1.0);
+}
+
+void main()
+{	
+	rtFragColor = vec4(geoColor, 1.0);; // Setting the base color
+    
+    //rtFragColor += calcLight(); // outputs the light
+    
+}
